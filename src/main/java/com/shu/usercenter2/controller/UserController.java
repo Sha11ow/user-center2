@@ -6,10 +6,14 @@ import com.shu.usercenter2.request.UserLoginRequest;
 import com.shu.usercenter2.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.jdbc.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.List;
 
 import static com.shu.usercenter2.constant.userLoginConstant.USER_LOGIN_STATE;
 import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
@@ -111,5 +115,55 @@ public class UserController {
         }
 
     }
+
+    /**
+     * 管理员查询用户,返回的是一个用户列表（同名同姓）
+     * @param user
+     * @return
+     */
+    @GetMapping("/selectUser")
+    public List<User> selectUser(@RequestBody User user, HttpServletRequest request) {
+        //取得角色身份
+        Object o = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            User cur_user=(User) o;
+            Integer role = cur_user.getRole();
+            if(role==0){
+                String name = user.getName();
+                return userService.selectUser(name);
+            }
+            else {
+                log.info("不是管理员");
+                return null;
+            }
+
+        }
+        else {
+            log.info("会话过期，令牌已失效");
+            return null;
+        }
+
+    }
+
+    //====================================================================================================
+    /**
+     * 用户查寻课程
+     * @param course
+     * @return
+     */
+    @GetMapping("/selectCourse")
+    public Course selectCourse(@RequestBody Course course,HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            Integer courseId = course.getCourse_id();
+            String courseName = course.getCourse_name();
+            return userService.selectCourse(courseName,courseId);
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return null;
+        }
+    }
+
 
 }

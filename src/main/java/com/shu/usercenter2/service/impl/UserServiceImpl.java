@@ -8,10 +8,14 @@ import com.shu.usercenter2.service.CourseService;
 import com.shu.usercenter2.service.UserService;
 import com.shu.usercenter2.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.Collections;
+import java.util.List;
 
 import static com.shu.usercenter2.constant.userLoginConstant.USER_LOGIN_STATE;
 
@@ -97,6 +101,46 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         new_course.setCourse_name(courseName);
 
         return courseService.save(new_course);
+    }
+
+    /**
+     * 根据姓名，查询角色返回列表
+     * @param name
+     * @return
+     */
+    @Override
+    public List<User> selectUser(String name) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("name",name);
+        List<User> users = this.list(queryWrapper);
+        if(!users.isEmpty()){
+            return users;
+        }
+        log.info("未找到用户：{}",name);
+        return Collections.emptyList();
+    }
+
+    /**
+     * 根据课程名，查询课程
+     *
+     * @param courseName
+     * @param courseId
+     * @return
+     */
+    @Override
+    public Course selectCourse(String courseName, Integer courseId) {
+        if (StringUtils.isAnyBlank(courseName) && courseId == null) {
+            log.info("Either courseName or courseId must be provided.");
+            return null;
+        }
+
+        QueryWrapper<Course> queryWrapper = new QueryWrapper<>();
+
+        queryWrapper.eq(courseName != null, "course_name", courseName);
+        queryWrapper.eq(courseId != null, "course_id", courseId);
+
+        return courseService.getOne(queryWrapper);
+
     }
 }
 

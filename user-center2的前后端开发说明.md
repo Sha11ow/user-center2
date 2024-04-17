@@ -62,3 +62,37 @@ public void logout(HttpServletRequest request) {
   ```
 
 前端应该传来course_name的json格式
+
+- 查询用户
+
+  ```Java
+  /**
+   * 管理员查询用户,返回的是一个用户列表（同名同姓）
+   * @param user
+   * @return
+   */
+  @GetMapping("/selectUser")
+  public List<User> selectUser(@RequestBody User user, HttpServletRequest request)
+  ```
+
+前端应该传给一个json格式的**name**字段
+
+后端返回一个user列表
+
+
+
+- 查询课程
+
+  ```Java
+  @GetMapping("/selectCourse")
+  public Course selectCourse(@RequestBody Course course, HttpServletRequest request) 
+  ```
+
+只要是用户就都能查询课程
+
+前端应该返回一个**course_id**和**course_name**的json字段（两者返回一个或者都返回）
+
+后端返回Coure对象
+
+//目前有bug，但不清楚为什么
+

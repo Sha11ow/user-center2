@@ -1,9 +1,11 @@
 package com.shu.usercenter2.service;
 
+import com.shu.usercenter2.domain.Course;
 import com.shu.usercenter2.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author huxing
@@ -34,4 +36,20 @@ public interface UserService extends IService<User> {
      * @return
      */
     boolean addCourse(String courseName);
+
+    /**
+     * 根据姓名，查询角色返回列表
+     * @param name
+     * @return
+     */
+    List<User> selectUser(String name);
+
+    /**
+     * 根据课程名或者课程号查询课程
+     *
+     * @param courseName
+     * @param courseId
+     * @return
+     */
+    Course selectCourse(String courseName, Integer courseId);
 }
