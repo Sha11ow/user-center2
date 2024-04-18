@@ -9,6 +9,26 @@
             <result property="course_name" column="course_name" jdbcType="VARCHAR"/>
     </resultMap>
 
+    <select id="selectByCourseInfo" resultMap="BaseResultMap">
+        SELECT *
+        FROM course
+        <where>
+            <if test="courseId != null">
+                course_id = #{courseId}
+            </if>
+            <if test="courseName != null">
+                <choose>
+                    <when test="courseId != null">
+                        AND course_name = #{courseName}
+                    </when>
+                    <otherwise>
+                        course_name = #{courseName}
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+    </select>
+
     <sql id="Base_Column_List">
         course_id,course_name
     </sql>

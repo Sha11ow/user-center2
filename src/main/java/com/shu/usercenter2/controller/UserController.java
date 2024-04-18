@@ -152,12 +152,12 @@ public class UserController {
      * @return
      */
     @GetMapping("/selectCourse")
-    public Course selectCourse(@RequestBody Course course,HttpServletRequest httpServletRequest){
+    public Course selectCourse(@RequestBody Course course, HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         if(o!=null){
             Integer courseId = course.getCourse_id();
             String courseName = course.getCourse_name();
-            return userService.selectCourse(courseName,courseId);
+            return userService.getCourseInfo(courseId,courseName);
         }
         else{
             log.info("会话过期，请重新登录");

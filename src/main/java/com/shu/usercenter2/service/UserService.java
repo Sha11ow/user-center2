@@ -51,5 +51,5 @@ public interface UserService extends IService<User> {
      * @param courseId
      * @return
      */
-    Course selectCourse(String courseName, Integer courseId);
+    Course getCourseInfo(Integer courseId, String courseName);
 }

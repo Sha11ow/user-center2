@@ -1,9 +1,11 @@
 package com.shu.usercenter2.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shu.usercenter2.domain.Course;
 import com.shu.usercenter2.domain.User;
+import com.shu.usercenter2.mapper.CourseMapper;
 import com.shu.usercenter2.service.CourseService;
 import com.shu.usercenter2.service.UserService;
 import com.shu.usercenter2.mapper.UserMapper;
@@ -31,6 +33,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private CourseMapper courseMapper;
 
     /**
      * 用户登录，返回用户信息，并将用户信息存入session
@@ -128,19 +132,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @return
      */
     @Override
-    public Course selectCourse(String courseName, Integer courseId) {
-        if (StringUtils.isAnyBlank(courseName) && courseId == null) {
-            log.info("Either courseName or courseId must be provided.");
+    public Course getCourseInfo(Integer courseId, String courseName) {
+        if (courseId == null && StringUtils.isBlank(courseName)) {
+            log.info("课程ID和课程名称不能同时为空");
             return null;
         }
 
-        QueryWrapper<Course> queryWrapper = new QueryWrapper<>();
-
-        queryWrapper.eq(courseName != null, "course_name", courseName);
-        queryWrapper.eq(courseId != null, "course_id", courseId);
-
-        return courseService.getOne(queryWrapper);
-
+        return courseMapper.selectByCourseInfo(courseId, courseName);
     }
 }
 
