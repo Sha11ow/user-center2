@@ -12,6 +12,27 @@
             <result property="capacity" column="capacity" jdbcType="INTEGER"/>
     </resultMap>
 
+    <select id="selectCourseSchedule" resultMap ="BaseResultMap">
+        SELECT * FROM course_schedule
+        <where>
+            <if test="courseId != null">
+                AND course_id = #{courseId}
+            </if>
+            <if test="semester != null">
+                AND semester = #{semester}
+            </if>
+            <if test="teacherId != null">
+                AND teacher_id = #{teacherId}
+            </if>
+            <if test="time != null and time != ''">
+                AND time = #{time}
+            </if>
+            <if test="capacity != null">
+                AND capacity = #{capacity}
+            </if>
+        </where>
+    </select>
+
     <sql id="Base_Column_List">
         semester,course_id,teacher_id,
         time,capacity

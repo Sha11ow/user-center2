@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shu.usercenter2.domain.Course;
+import com.shu.usercenter2.domain.CourseSchedule;
 import com.shu.usercenter2.domain.User;
 import com.shu.usercenter2.mapper.CourseMapper;
+import com.shu.usercenter2.mapper.CourseScheduleMapper;
+import com.shu.usercenter2.service.CourseScheduleService;
 import com.shu.usercenter2.service.CourseService;
 import com.shu.usercenter2.service.UserService;
 import com.shu.usercenter2.mapper.UserMapper;
@@ -35,6 +38,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private CourseService courseService;
     @Autowired
     private CourseMapper courseMapper;
+    @Autowired
+    private CourseScheduleService courseScheduleService;
+    @Autowired
+    private CourseScheduleMapper courseScheduleMapper;
 
     /**
      * 用户登录，返回用户信息，并将用户信息存入session
@@ -140,6 +147,90 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         return courseMapper.selectByCourseInfo(courseId, courseName);
     }
+
+    /**
+     * 用户查询课程表
+     * @param courseId
+     * @param semester
+     * @param teacherId
+     * @param time
+     * @param capacity
+     * @return
+     */
+    @Override
+    public List<CourseSchedule> selectCourseSchedule(Integer courseId, Integer semester, Integer teacherId,
+                                                     String time, Integer capacity) {
+        if (courseId == null) {
+            log.info("课程ID不能为空");
+            return Collections.emptyList();
+        }
+        return courseScheduleMapper.selectCourseSchedule(courseId, semester, teacherId, time, capacity);
+    }
+
+    @Override
+    public boolean addCourseSchedule(Integer courseId, Integer semester, Integer teacherId, String time, Integer capacity) {
+        //如果有一个参数为空，返回false
+        if (courseId == null || semester == null || teacherId == null || StringUtils.isBlank(time) || capacity == null) {
+            log.info("参数不能为空");
+            return false;
+        }
+        //如果课表里已经有一个则不添加
+        QueryWrapper<CourseSchedule> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("course_id", courseId);
+        queryWrapper.eq("semester", semester);
+        queryWrapper.eq("teacher_id", teacherId);
+        queryWrapper.eq("time", time);
+        queryWrapper.eq("capacity", capacity);
+        int count = courseScheduleService.count(queryWrapper);
+        if (count > 0) {
+            log.info("课表已存在");
+            return false;
+        }
+        CourseSchedule courseSchedule = new CourseSchedule();
+        courseSchedule.setCourse_id(courseId);
+        courseSchedule.setSemester(semester);
+        courseSchedule.setTeacher_id(teacherId);
+        courseSchedule.setTime(time);
+        courseSchedule.setCapacity(capacity);
+        return courseScheduleService.save(courseSchedule);
+    }
+
+    /**
+     * 用户选课
+     * @param courseId
+     * @param semester
+     * @param teacherId
+     * @param studentId
+     * @param time
+     * @param capacity
+     * @return
+     */
+//    @Override
+//    public boolean courseSelect(Integer courseId, Integer semester,
+//                                Integer teacherId, String time,
+//                                Integer capacity, Integer studentId) {
+//        //先检查课程是否存在,这里应该查课程表，因为课程存在不一定课程表就有
+//        QueryWrapper<CourseSchedule> wrapper = new QueryWrapper<>();
+//        wrapper.eq("course_id", courseId);
+//        wrapper.eq("semester", semester);
+//        wrapper.eq("teacher_id", teacherId);
+//        wrapper.eq("time", time);
+//
+//        if (course == null) {
+//            log.info("课程不存在");
+//            return false;
+//        }
+//        //检查课程是否已满
+//        if (course.getCapacity() <= 0) {
+//            log.info("课程已满");
+//            return false;
+//        }
+//        //检查学生是否已选过该课程
+//        QueryWrapper<Course> queryWrapper = new QueryWrapper<>();
+//        return false;
+//    }
+
+
 }
 
 

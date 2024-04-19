@@ -1,6 +1,7 @@
 package com.shu.usercenter2.service;
 
 import com.shu.usercenter2.domain.Course;
+import com.shu.usercenter2.domain.CourseSchedule;
 import com.shu.usercenter2.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -52,4 +53,42 @@ public interface UserService extends IService<User> {
      * @return
      */
     Course getCourseInfo(Integer courseId, String courseName);
+
+    /**
+     * 用户查询课程表
+     * @param courseId
+     * @param semester
+     * @param teacherId
+     * @param time
+     * @param capacity
+     * @return
+     */
+    List<CourseSchedule> selectCourseSchedule(Integer courseId, Integer semester,
+                                              Integer teacherId, String time, Integer capacity);
+
+    /**
+     * 添加课程表
+     * @param courseId
+     * @param semester
+     * @param teacherId
+     * @param time
+     * @param capacity
+     * @return
+     */
+    boolean addCourseSchedule(Integer courseId, Integer semester, Integer teacherId, String time, Integer capacity);
+
+
+    /**
+     * 用户选课
+     * @param courseId
+     * @param semester
+     * @param teacherId
+     * @param studentId
+     * @param time
+     * @param capacity
+     * @return
+     */
+//    boolean courseSelect(Integer courseId, Integer semester, Integer teacherId, String time, Integer capacity, Integer studentId);
+
+
 }

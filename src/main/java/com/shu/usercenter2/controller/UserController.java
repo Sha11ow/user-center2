@@ -1,6 +1,8 @@
 package com.shu.usercenter2.controller;
 
 import com.shu.usercenter2.domain.Course;
+import com.shu.usercenter2.domain.CourseSchedule;
+import com.shu.usercenter2.domain.CourseSelection;
 import com.shu.usercenter2.domain.User;
 import com.shu.usercenter2.request.UserLoginRequest;
 import com.shu.usercenter2.service.UserService;
@@ -117,6 +119,39 @@ public class UserController {
     }
 
     /**
+     * 管理员添加课表
+     * @param courseSchedule
+     * @return
+     */
+    @GetMapping("/addCourseSchedule")
+    public boolean addCourseSchedule(@RequestBody CourseSchedule courseSchedule, HttpServletRequest request) {
+        //取得角色身份
+        Object o = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            User cur_user=(User) o;
+            Integer role = cur_user.getRole();
+            if(role==0){
+                Integer semester = courseSchedule.getSemester();
+                Integer courseId = courseSchedule.getCourse_id();
+                Integer teacherId = courseSchedule.getTeacher_id();
+                String time = courseSchedule.getTime();
+                Integer capacity = courseSchedule.getCapacity();
+                return userService.addCourseSchedule(courseId, semester, teacherId,time,capacity);
+            }
+            else {
+                log.info("不是管理员");
+                return false;
+            }
+
+        }
+        else {
+            log.info("会话过期，令牌已失效");
+            return false;
+        }
+
+    }
+
+    /**
      * 管理员查询用户,返回的是一个用户列表（同名同姓）
      * @param user
      * @return
@@ -164,6 +199,61 @@ public class UserController {
             return null;
         }
     }
+
+    /**
+     * 用户对课表查询
+     * @param courseSchedule
+     */
+    @GetMapping("/selectCourseSchedule")
+    public List<CourseSchedule> selectCourseSchedule(@RequestBody CourseSchedule courseSchedule,
+                                                     HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            Integer semester = courseSchedule.getSemester();
+            Integer courseId = courseSchedule.getCourse_id();
+            Integer teacherId = courseSchedule.getTeacher_id();
+            String time = courseSchedule.getTime();
+            Integer capacity = courseSchedule.getCapacity();
+            return userService.selectCourseSchedule(courseId, semester, teacherId,time,capacity);
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return null;
+        }
+    }
+
+    /**
+     * 学生或者管理员选课,如果是学生就用会话的学生id信息，如果是管理员就用传入的学生id信息
+     * @param courseSelection
+     * @return
+     */
+//    @GetMapping("/courseSelect")
+//    public boolean courseSelect(@RequestBody CourseSelection courseSelection,
+//                                @RequestBody CourseSchedule courseSchedule,
+//                                HttpServletRequest httpServletRequest){
+//        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+//        if(o!=null) {
+//            User user = (User) o;
+//            if (user.getRole() == 2) {
+//                log.info("教师无法选课");
+//                return false;
+//            }
+//            Integer studentId = null;
+//            if (user.getRole() == 0) {
+//                studentId = courseSelection.getStudent_id();
+//            }
+//            Integer semester = courseSchedule.getSemester();
+//            Integer courseId = courseSchedule.getCourse_id();
+//            Integer teacherId = courseSchedule.getTeacher_id();
+//            String time = courseSchedule.getTime();
+//            Integer capacity = courseSchedule.getCapacity();
+//            return userService.courseSelect(courseId, semester, teacherId,time,capacity, studentId);
+//        }
+//        else{
+//            log.info("会话过期，请重新登录");
+//            return false;
+//        }
+//    }
 
 
 }

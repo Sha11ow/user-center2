@@ -50,7 +50,7 @@ public void logout(HttpServletRequest request) {
 
 前端应该给后端传入一个json格式对象**（应该包含name和role字段）**，后端反序列化成一个user对象，应该包含name和role字段。
 
-- 添加课程
+- 添加课程（注意我这边添加的课程没有对应的选课，管理员后续还应该添加课程表信息）
 
   ```Java
   /**
@@ -62,6 +62,17 @@ public void logout(HttpServletRequest request) {
   ```
 
 前端应该传来course_name的json格式
+
+- 添加课程表
+
+  ```Java
+  @GetMapping("/addCourseSchedule")
+  public boolean addCourseSchedule(@RequestBody CourseSchedule courseSchedule, HttpServletRequest request)
+  ```
+
+前端应该返回以下所有字段**course_id**和**teacher_id**和**semester**和**time**和**capacity**的json字段
+
+如果有重复课程或者有字段为空返回false，否则返回true添加成功
 
 - 查询用户
 
@@ -79,8 +90,6 @@ public void logout(HttpServletRequest request) {
 
 后端返回一个user列表
 
-
-
 - 查询课程
 
   ```Java
@@ -93,6 +102,20 @@ public void logout(HttpServletRequest request) {
 前端应该返回一个**course_id**和**course_name**的json字段（两者返回一个或者都返回）
 
 后端返回Coure对象
+
+- 查询课程表
+
+  ```Java
+  @GetMapping("/selectCourseSchedule")
+  public List<CourseSchedule> selectCourseSchedule(@RequestBody CourseSchedule courseSchedule,
+                                                   HttpServletRequest httpServletRequest)
+  ```
+
+只要是用户就都能查询课程表
+
+前端应该至少返回一个**course_id**或**teacher_id**或**semester**或**time**或**capacity**的json字段（至少要有course_id）
+
+后端返回**CoureSchedule**列表
 
 
 
