@@ -2,6 +2,7 @@ package com.shu.usercenter2.service;
 
 import com.shu.usercenter2.domain.Course;
 import com.shu.usercenter2.domain.CourseSchedule;
+import com.shu.usercenter2.domain.CourseSelection;
 import com.shu.usercenter2.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -91,4 +92,11 @@ public interface UserService extends IService<User> {
                           Integer studentId);
 
 
+    /**
+     * 学生学期课表查询
+     * @param semester
+     * @param studentId
+     * @return
+     */
+    List<CourseSchedule> semesterCourseSelection(Integer studentId, Integer semester);
 }

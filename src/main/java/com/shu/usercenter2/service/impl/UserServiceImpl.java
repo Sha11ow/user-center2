@@ -296,6 +296,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return true;
     }
 
+    /**
+     * 学生学期课表查询
+     * @param semester
+     * @param studentId
+     * @return
+     */
+    @Override
+    public List<CourseSchedule> semesterCourseSelection(Integer studentId, Integer semester) {
+        if (studentId == null || semester == null) {
+            log.info("参数不能为空");
+            return Collections.emptyList();
+        }
+        List<CourseSelection> courseSelections = courseSelectionMapper.findCourseSelectionsByStudentId(studentId);
+
+        if (courseSelections.isEmpty()) {
+            log.info("未找到选课记录");
+            return Collections.emptyList();
+        }
+
+        for (CourseSelection courseSelection : courseSelections) {
+            List<CourseSchedule> courseSchedules = selectCourseSchedule(courseSelection.getCourse_id(),
+                    courseSelection.getSemester(), courseSelection.getTeacher_id(), null, null);
+            if (courseSchedules.isEmpty()) {
+                log.info("课程表不存在,数据库数据有问题");
+                return Collections.emptyList();
+            }
+            return courseSchedules;
+
+        }
+        return Collections.emptyList();
+    }
+
 
 }
 

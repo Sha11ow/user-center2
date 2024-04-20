@@ -123,6 +123,8 @@ public void logout(HttpServletRequest request) {
 
 **====================注意我把course_schedule的time并入了主键，对数据库的修改====================**
 
+**规定一个老师一学期同一门课只能开一门，不然会有点麻烦，上述字段可以不修改了，但为了一致，你们还是改一下吧**
+
 - 学生选课
 
   ```java
@@ -163,3 +165,30 @@ Content-Type: application/json
   "capacity": null
 }
 ```
+
+- 学生或管理员查询学生某学期的选课情况,用的是courseSelection查询，返回的是一个课程安排列表
+
+```Java
+/**
+ * 学生或管理员查询学生某学期的选课情况,用的是courseSelection查询，返回的是一个课程安排列表
+ */
+@GetMapping("/semesterCourseSelection")
+public List<CourseSchedule> semesterCourseSelection(@RequestBody CourseSelection courseSelection,
+                                                     HttpServletRequest httpServletRequest)
+```
+
+学生查询模板
+
+```json
+{
+  "semester": 202303,
+  "course_id": null,
+  "teacher_id": null,
+  "student_id": null
+}
+```
+
+管理员记得带上student_id
+
+**这里规定一个老师一学期同一门课只能开一门，不然会查歪来**（给course_selection添加time字段可以解决，但算了）
+

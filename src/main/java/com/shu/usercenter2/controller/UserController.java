@@ -9,8 +9,6 @@ import com.shu.usercenter2.request.UserSelectCourseScheduleRequest;
 import com.shu.usercenter2.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.jdbc.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.shu.usercenter2.constant.userLoginConstant.USER_LOGIN_STATE;
-import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
 
 @RestController
 @RequestMapping("/user")
@@ -257,6 +254,32 @@ public class UserController {
         else{
             log.info("会话过期，请重新登录");
             return false;
+        }
+    }
+
+    /**
+     * 学生或管理员查询学生某学期的选课情况,用的是courseSelection查询，返回的是一个课程安排列表
+     */
+    @GetMapping("/semesterCourseSelection")
+    public List<CourseSchedule> semesterCourseSelection(@RequestBody CourseSelection courseSelection,
+                                                         HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            User user = (User) o;
+            Integer studentId = courseSelection.getStudent_id();
+            Integer semester = courseSelection.getSemester();
+            if(user.getRole()==0){
+                if(studentId==null){
+                    log.info("管理员查询学生选课情况需要传入学生id");
+                    return null;
+                }
+            }
+            if(user.getRole()==1) studentId = user.getId();
+            return userService.semesterCourseSelection(studentId,semester);
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return null;
         }
     }
 
