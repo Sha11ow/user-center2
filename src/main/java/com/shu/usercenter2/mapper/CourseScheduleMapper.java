@@ -4,6 +4,7 @@ import com.shu.usercenter2.domain.CourseSchedule;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -31,6 +32,10 @@ public interface CourseScheduleMapper extends BaseMapper<CourseSchedule> {
             @Param("teacherId") Integer teacherId,
             @Param("time") String time,
             @Param("capacity") Integer capacity);
+
+
+    @Update("UPDATE course_schedule SET capacity = capacity - 1 WHERE  semester = #{semester} AND time = #{time} AND teacher_id = #{teacherId} AND course_id = #{courseId}")
+    int updateCapacityByData(@Param("semester") Integer semester, @Param("time") String time, @Param("teacherId") Integer teacherId, @Param("courseId") Integer courseId);
 
 }
 

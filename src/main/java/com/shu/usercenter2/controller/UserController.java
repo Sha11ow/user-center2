@@ -5,6 +5,7 @@ import com.shu.usercenter2.domain.CourseSchedule;
 import com.shu.usercenter2.domain.CourseSelection;
 import com.shu.usercenter2.domain.User;
 import com.shu.usercenter2.request.UserLoginRequest;
+import com.shu.usercenter2.request.UserSelectCourseScheduleRequest;
 import com.shu.usercenter2.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -223,37 +224,41 @@ public class UserController {
     }
 
     /**
-     * 学生或者管理员选课,如果是学生就用会话的学生id信息，如果是管理员就用传入的学生id信息
-     * @param courseSelection
+     * 学生或者管理员选课,如果是学生就用会话的学生id信息,传参为null，如果是管理员就用传入的学生id信息，不能为null
      * @return
      */
-//    @GetMapping("/courseSelect")
-//    public boolean courseSelect(@RequestBody CourseSelection courseSelection,
-//                                @RequestBody CourseSchedule courseSchedule,
-//                                HttpServletRequest httpServletRequest){
-//        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
-//        if(o!=null) {
-//            User user = (User) o;
-//            if (user.getRole() == 2) {
-//                log.info("教师无法选课");
-//                return false;
-//            }
-//            Integer studentId = null;
-//            if (user.getRole() == 0) {
-//                studentId = courseSelection.getStudent_id();
-//            }
-//            Integer semester = courseSchedule.getSemester();
-//            Integer courseId = courseSchedule.getCourse_id();
-//            Integer teacherId = courseSchedule.getTeacher_id();
-//            String time = courseSchedule.getTime();
-//            Integer capacity = courseSchedule.getCapacity();
-//            return userService.courseSelect(courseId, semester, teacherId,time,capacity, studentId);
-//        }
-//        else{
-//            log.info("会话过期，请重新登录");
-//            return false;
-//        }
-//    }
+    @GetMapping("/courseSelect")
+    public boolean courseSelect(@RequestBody UserSelectCourseScheduleRequest courseSchedule,
+                                HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null) {
+            User user = (User) o;
+            if (user.getRole() == 2) {
+                log.info("教师无法选课");
+                return false;
+            }
+            Integer courseId = courseSchedule.getCourse_id();
+            Integer semester = courseSchedule.getSemester();
+            Integer teacherId = courseSchedule.getTeacher_id();
+            String time = courseSchedule.getTime();
+            Integer capacity = courseSchedule.getCapacity();
+            Integer studentId = courseSchedule.getStudent_id();
+
+            if (user.getRole() == 0) {
+                if (studentId == null) {
+                    log.info("管理员选课需要传入学生id");
+                    return false;
+                }
+            }
+            if (user.getRole() == 1) studentId = user.getId();
+
+            return userService.courseSelect(courseId, semester, teacherId,time,capacity, studentId);
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return false;
+        }
+    }
 
 
 }

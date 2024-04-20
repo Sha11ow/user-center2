@@ -1,3 +1,5 @@
+
+
 # user-center2的前后端开发说明
 
 在这之前，可以开发一个/home做主页，但能跳转到user/login，或者直接user/login做主页。
@@ -115,7 +117,49 @@ public void logout(HttpServletRequest request) {
 
 前端应该至少返回一个**course_id**或**teacher_id**或**semester**或**time**或**capacity**的json字段（至少要有course_id）
 
+但前端其实只留下前四个字段选项就够了，这里capacity可以永远不传
+
 后端返回**CoureSchedule**列表
 
+**====================注意我把course_schedule的time并入了主键，对数据库的修改====================**
 
+- 学生选课
 
+  ```java
+  @GetMapping("/courseSelect")
+  public boolean courseSelect(@RequestBody UserSelectCourseScheduleRequest courseSchedule,
+                              HttpServletRequest httpServletRequest)
+  ```
+
+如果是管理员需要多传一个student_id字段，学生就可以让student_id为null，成功选课返回true
+
+模板格式
+
+- 管理员版
+
+```json
+{
+  "course_id": 1016,
+  "semester": 202304,
+  "student_id": 21109,
+  "teacher_id": 10030,
+  "time": "二1-2",
+  "capacity": null
+}
+```
+
+- 学生版
+
+```json
+GET http://localhost:8080/user/courseSelect
+Content-Type: application/json
+
+{
+  "course_id": 1016,
+  "semester": 202304,
+  "student_id": null,
+  "teacher_id": 10030,
+  "time": "二1-2",
+  "capacity": null
+}
+```

@@ -11,6 +11,11 @@
             <id property="student_id" column="student_id" jdbcType="INTEGER"/>
     </resultMap>
 
+    <select id="findCourseSelectionsByStudentId" resultMap="BaseResultMap">
+        SELECT * FROM course_selection
+        WHERE student_id = #{studentId}
+    </select>
+
     <sql id="Base_Column_List">
         semester,course_id,teacher_id,
         student_id

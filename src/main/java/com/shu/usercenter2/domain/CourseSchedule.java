@@ -35,6 +35,7 @@ public class CourseSchedule implements Serializable {
     /**
      * 
      */
+    @TableId
     private String time;
 
     /**

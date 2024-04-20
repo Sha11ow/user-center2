@@ -85,10 +85,10 @@ public interface UserService extends IService<User> {
      * @param teacherId
      * @param studentId
      * @param time
-     * @param capacity
      * @return
      */
-//    boolean courseSelect(Integer courseId, Integer semester, Integer teacherId, String time, Integer capacity, Integer studentId);
+    boolean courseSelect(Integer courseId, Integer semester, Integer teacherId, String time,Integer capacity,
+                          Integer studentId);
 
 
 }

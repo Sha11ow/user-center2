@@ -1,10 +1,14 @@
 package com.shu.usercenter2.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shu.usercenter2.domain.CourseSelection;
 import com.shu.usercenter2.service.CourseSelectionService;
 import com.shu.usercenter2.mapper.CourseSelectionMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
 * @author huxing

@@ -5,10 +5,13 @@ import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapp
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shu.usercenter2.domain.Course;
 import com.shu.usercenter2.domain.CourseSchedule;
+import com.shu.usercenter2.domain.CourseSelection;
 import com.shu.usercenter2.domain.User;
 import com.shu.usercenter2.mapper.CourseMapper;
 import com.shu.usercenter2.mapper.CourseScheduleMapper;
+import com.shu.usercenter2.mapper.CourseSelectionMapper;
 import com.shu.usercenter2.service.CourseScheduleService;
+import com.shu.usercenter2.service.CourseSelectionService;
 import com.shu.usercenter2.service.CourseService;
 import com.shu.usercenter2.service.UserService;
 import com.shu.usercenter2.mapper.UserMapper;
@@ -42,6 +45,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private CourseScheduleService courseScheduleService;
     @Autowired
     private CourseScheduleMapper courseScheduleMapper;
+    @Autowired
+    private CourseSelectionService courseSelectionService;
+    @Autowired
+    private CourseSelectionMapper courseSelectionMapper;
 
     /**
      * 用户登录，返回用户信息，并将用户信息存入session
@@ -205,30 +212,89 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @param capacity
      * @return
      */
-//    @Override
-//    public boolean courseSelect(Integer courseId, Integer semester,
-//                                Integer teacherId, String time,
-//                                Integer capacity, Integer studentId) {
-//        //先检查课程是否存在,这里应该查课程表，因为课程存在不一定课程表就有
-//        QueryWrapper<CourseSchedule> wrapper = new QueryWrapper<>();
-//        wrapper.eq("course_id", courseId);
-//        wrapper.eq("semester", semester);
-//        wrapper.eq("teacher_id", teacherId);
-//        wrapper.eq("time", time);
-//
-//        if (course == null) {
-//            log.info("课程不存在");
-//            return false;
-//        }
-//        //检查课程是否已满
-//        if (course.getCapacity() <= 0) {
-//            log.info("课程已满");
-//            return false;
-//        }
-//        //检查学生是否已选过该课程
-//        QueryWrapper<Course> queryWrapper = new QueryWrapper<>();
-//        return false;
-//    }
+    @Override
+    public boolean courseSelect(Integer courseId, Integer semester,
+                                Integer teacherId, String time,
+                                Integer capacity,
+                                Integer studentId) {
+
+        //除capacity的字段都不能为空，否则返回false
+        if (courseId == null || semester == null || teacherId == null || StringUtils.isBlank(time)  || studentId == null) {
+            log.info("参数不能为空");
+            return false;
+        }
+
+        //检查课程是否存在
+        List<CourseSchedule> courseSchedules = selectCourseSchedule(courseId, semester, teacherId, time, capacity);
+        if (courseSchedules.isEmpty()) {
+            log.info("课程表不存在");
+            return false;
+        }
+
+        //这里因为需要所有字段，所以最多也就一个对应课程表
+        CourseSchedule courseSchedule = courseSchedules.get(0);
+
+        //检查课程是否已满
+        if (courseSchedule.getCapacity() <= 0) {
+            log.info("课程已满");
+            return false;
+        }
+
+        //检查是否已选过该课程
+        QueryWrapper<CourseSelection> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("course_id", courseId);
+        queryWrapper.eq("student_id", studentId);
+        int count = courseSelectionService.count(queryWrapper);
+        if (count > 0) {
+            log.info("已选过该课程");
+            return false;
+        }
+
+        //检查是否会有时间冲突
+        List<CourseSelection> courseSelections = courseSelectionMapper.findCourseSelectionsByStudentId(studentId);
+
+        if (!courseSelections.isEmpty()) {
+            for (CourseSelection courseSelection : courseSelections) {
+                List<CourseSchedule> schedules = selectCourseSchedule(courseSelection.getCourse_id(),
+                        courseSelection.getSemester(), courseSelection.getTeacher_id(), null, null);
+                if (schedules.isEmpty()) {
+                    log.info("课程表不存在,数据库数据有问题");
+                    return false;
+                }
+                for (CourseSchedule schedule : schedules) {
+                    if (schedule.getTime().equals(courseSchedule.getTime()) &&
+                            schedule.getSemester().equals(courseSchedule.getSemester())) {
+                        log.info("时间冲突");
+                        return false;
+                    }
+                }
+            }
+        }
+
+
+        //选课
+        CourseSelection courseSelection = new CourseSelection();
+        courseSelection.setCourse_id(courseId);
+        courseSelection.setSemester(semester);
+        courseSelection.setTeacher_id(teacherId);
+        courseSelection.setStudent_id(studentId);
+        boolean save = courseSelectionService.save(courseSelection);
+        if (!save) {
+            log.info("选课失败");
+            return false;
+        }
+
+        //更新课程表
+        courseSchedule.setCapacity(courseSchedule.getCapacity() - 1);
+        int rowsAffected = courseScheduleMapper.updateCapacityByData(courseSchedule.getSemester(),
+                courseSchedule.getTime(), courseSchedule.getTeacher_id(), courseSchedule.getCourse_id());
+        if (rowsAffected == 0) {
+            log.info("更新课程表失败");
+            return false;
+        }
+
+        return true;
+    }
 
 
 }

@@ -45,3 +45,7 @@
 
 - 我大概知道bug原因了，querywrapper没有用到Myvatis的BaseMap做映射，导致驼峰命名的字段能被查询但不能被正确返回，真有点搞
 - 明天再开发选课功能
+
+***2024/4/20***
+
+- 将course_schedule的time合并到了主键

@@ -33,8 +33,18 @@
         </where>
     </select>
 
+    <update id="updateCapacityByData">
+        UPDATE course_schedule
+        SET capacity = capacity - 1
+        WHERE semester = #{semester}
+          AND time = #{time}
+          AND teacher_id = #{teacherId}
+          AND course_id = #{courseId}
+    </update>
+
     <sql id="Base_Column_List">
         semester,course_id,teacher_id,
         time,capacity
     </sql>
+
 </mapper>
