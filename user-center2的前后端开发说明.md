@@ -192,3 +192,72 @@ public List<CourseSchedule> semesterCourseSelection(@RequestBody CourseSelection
 
 **这里规定一个老师一学期同一门课只能开一门，不然会查歪来**（给course_selection添加time字段可以解决，但算了）
 
+- 学生或管理员退课
+
+  ```Java
+  /**
+   * 学生或管理员退课
+   */
+  @GetMapping("/courseWithdraw")
+  public boolean courseWithdraw(@RequestBody UserSelectCourseScheduleRequest courseSchedule,
+                                HttpServletRequest httpServletRequest)
+  ```
+
+学生模板
+
+```json
+{
+  "course_id": 1000,
+  "semester": 202303,
+  "student_id": null,
+  "teacher_id": 10000,
+  "time": "一3-4",
+  "capacity": null
+}
+```
+
+管理员需要带上学生id字段，讲道理如果time不为主键应该也可以为空（因为规定了老师的开课限制），但我的代码要求不为空我也不是很想改了。
+
+- 管理员或教师更改成绩
+
+```java
+/**
+ * 教师或管理员更新成绩
+ */
+@PutMapping("/updateScore")
+public boolean updateScore(@RequestBody UserUpdateScoreRequest score, HttpServletRequest httpServletRequest)
+```
+
+返回一个bool值表示是否修改成功
+
+模板
+
+```json
+{
+  "course_id": 1000,
+  "student_id": 21036,
+  "new_score": 85,
+  "semester": 202303
+}
+```
+
+- 教师或管理员添加学生成绩
+
+```java
+/**
+     * 教师或管理员添加学生成绩
+     */
+@GetMapping("/addScore")
+public boolean addScore(@RequestBody Score score, HttpServletRequest httpServletRequest)
+```
+
+模板
+
+```json
+{
+  "semester": 202303,
+  "course_id": 1026,
+  "student_id": 21036,
+  "score": 91
+}
+```

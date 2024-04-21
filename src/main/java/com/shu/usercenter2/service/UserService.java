@@ -99,4 +99,36 @@ public interface UserService extends IService<User> {
      * @return
      */
     List<CourseSchedule> semesterCourseSelection(Integer studentId, Integer semester);
+
+    /**
+     * 学生退课
+     * @param courseId
+     * @param semester
+     * @param teacherId
+     * @param time
+     * @param capacity
+     * @param studentId
+     * @return
+     */
+    boolean courseWithdraw(Integer courseId, Integer semester, Integer teacherId, String time, Integer capacity, Integer studentId);
+
+    /**
+     * 更新成绩
+     * @param courseId
+     * @param semester
+     * @param studentId
+     * @param newScore
+     * @return
+     */
+    boolean updateScore(Integer courseId, Integer semester, Integer studentId,Integer newScore);
+
+    /**
+     * 根据课程ID、学期和学生ID获取单个Score对象。
+     *
+     * @param courseId   课程ID
+     * @param semester   学期
+     * @param studentId  学生ID
+     * @return 匹配的Score对象，如果没有找到则返回null
+     */
+    boolean addScore(Integer courseId, Integer semester, Integer studentId, Integer score1);
 }

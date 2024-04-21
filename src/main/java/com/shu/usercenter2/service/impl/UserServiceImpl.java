@@ -3,18 +3,9 @@ package com.shu.usercenter2.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.shu.usercenter2.domain.Course;
-import com.shu.usercenter2.domain.CourseSchedule;
-import com.shu.usercenter2.domain.CourseSelection;
-import com.shu.usercenter2.domain.User;
-import com.shu.usercenter2.mapper.CourseMapper;
-import com.shu.usercenter2.mapper.CourseScheduleMapper;
-import com.shu.usercenter2.mapper.CourseSelectionMapper;
-import com.shu.usercenter2.service.CourseScheduleService;
-import com.shu.usercenter2.service.CourseSelectionService;
-import com.shu.usercenter2.service.CourseService;
-import com.shu.usercenter2.service.UserService;
-import com.shu.usercenter2.mapper.UserMapper;
+import com.shu.usercenter2.domain.*;
+import com.shu.usercenter2.mapper.*;
+import com.shu.usercenter2.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +40,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private CourseSelectionService courseSelectionService;
     @Autowired
     private CourseSelectionMapper courseSelectionMapper;
+    @Autowired
+    private ScoreService scoreService;
+    @Autowired
+    private ScoreMapper scoreMapper;
 
     /**
      * 用户登录，返回用户信息，并将用户信息存入session
@@ -326,6 +321,120 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * 学生退课
+     * @param courseId
+     * @param semester
+     * @param teacherId
+     * @param time
+     * @param capacity
+     * @param studentId
+     * @return
+     */
+    @Override
+    public boolean courseWithdraw(Integer courseId, Integer semester, Integer teacherId, String time, Integer capacity, Integer studentId) {
+
+        //除capacity的字段都不能为空，否则返回false
+        if (courseId == null || semester == null || teacherId == null || StringUtils.isBlank(time)  || studentId == null) {
+            log.info("参数不能为空");
+            return false;
+        }
+
+        //检查课程是否存在
+        List<CourseSchedule> courseSchedules = selectCourseSchedule(courseId, semester, teacherId, time, capacity);
+        if (courseSchedules.isEmpty()) {
+            log.info("课程表不存在");
+            return false;
+        }
+
+        //这里因为需要所有字段，所以最多也就一个对应课程表
+        CourseSchedule courseSchedule = courseSchedules.get(0);
+
+        //删除选课记录
+        QueryWrapper<CourseSelection> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("course_id", courseId);
+        queryWrapper.eq("student_id", studentId);
+        boolean remove = courseSelectionService.remove(queryWrapper);
+        if (!remove) {
+            log.info("退课失败");
+            return false;
+        }
+
+        //更新课程表
+        courseSchedule.setCapacity(courseSchedule.getCapacity() + 1);
+        int rowsAffected = courseScheduleMapper.updateCapacityByData(courseSchedule.getSemester(),
+                courseSchedule.getTime(), courseSchedule.getTeacher_id(), courseSchedule.getCourse_id());
+        if (rowsAffected == 0) {
+            log.info("更新课程表失败");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 更新成绩
+     * @param courseId
+     * @param semester
+     * @param studentId
+     * @param newScore
+     * @return
+     */
+    @Override
+    public boolean updateScore(Integer courseId, Integer semester, Integer studentId, Integer newScore) {
+        if (courseId==null||semester==null||studentId==null||newScore==null){
+            log.info("有参数为空，失败");
+            return false;
+        }
+
+        Score score = scoreMapper.getScoreByConditions(courseId, semester, studentId);
+
+        if (score==null){
+            log.info("未找到成绩记录");
+            return false;
+        }
+        score.setScore(newScore);
+        int cnt = scoreMapper.updateScore(newScore, courseId, semester, studentId);
+        if (cnt==0){
+            log.info("更新失败");
+            return false;
+        }
+        return true;
+
+    }
+
+
+    /**
+     * 添加成绩
+     * @param courseId
+     * @param semester
+     * @param studentId
+     * @param score1
+     * @return
+     */
+    @Override
+    public boolean addScore(Integer courseId, Integer semester, Integer studentId, Integer score1) {
+        if (courseId==null||semester==null||studentId==null||score1==null){
+            log.info("有参数为空，失败");
+            return false;
+        }
+
+        Score score = scoreMapper.getScoreByConditions(courseId, semester, studentId);
+
+        if (score!=null){
+            log.info("已存在成绩记录");
+            return false;
+        }
+
+        Score newScore = new Score();
+        newScore.setCourse_id(courseId);
+        newScore.setSemester(semester);
+        newScore.setStudent_id(studentId);
+        newScore.setScore(score1);
+
+        return scoreService.save(newScore);
     }
 
 

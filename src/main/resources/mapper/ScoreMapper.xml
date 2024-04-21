@@ -11,6 +11,23 @@
             <result property="score" column="score" jdbcType="INTEGER"/>
     </resultMap>
 
+    <!-- Update score by ID -->
+    <update id="updateScore">
+        UPDATE score
+        SET score = #{newScore}
+        WHERE course_id = #{courseId}
+          AND semester = #{semester}
+          AND student_id = #{studentId}
+    </update>
+
+    <!-- Select single Score by courseId, semester, and studentId -->
+    <select id="getScoreByConditions" resultMap="BaseResultMap">
+        SELECT * FROM score
+        WHERE course_id = #{courseId}
+          AND semester = #{semester}
+          AND student_id = #{studentId}
+    </select>
+
     <sql id="Base_Column_List">
         semester,course_id,student_id,
         score

@@ -1,11 +1,9 @@
 package com.shu.usercenter2.controller;
 
-import com.shu.usercenter2.domain.Course;
-import com.shu.usercenter2.domain.CourseSchedule;
-import com.shu.usercenter2.domain.CourseSelection;
-import com.shu.usercenter2.domain.User;
+import com.shu.usercenter2.domain.*;
 import com.shu.usercenter2.request.UserLoginRequest;
 import com.shu.usercenter2.request.UserSelectCourseScheduleRequest;
+import com.shu.usercenter2.request.UserUpdateScoreRequest;
 import com.shu.usercenter2.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -283,5 +281,94 @@ public class UserController {
         }
     }
 
+    /**
+     * 学生或管理员退课
+     */
+    @GetMapping("/courseWithdraw")
+    public boolean courseWithdraw(@RequestBody UserSelectCourseScheduleRequest courseSchedule,
+                                  HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null) {
+            User user = (User) o;
+            if (user.getRole() == 2) {
+                log.info("教师无法退课");
+                return false;
+            }
+            Integer courseId = courseSchedule.getCourse_id();
+            Integer semester = courseSchedule.getSemester();
+            Integer teacherId = courseSchedule.getTeacher_id();
+            String time = courseSchedule.getTime();
+            Integer capacity = courseSchedule.getCapacity();
+            Integer studentId = courseSchedule.getStudent_id();
+
+            if (user.getRole() == 0) {
+                if (studentId == null) {
+                    log.info("管理员退课需要传入学生id");
+                    return false;
+                }
+            }
+            if (user.getRole() == 1) studentId = user.getId();
+
+            return userService.courseWithdraw(courseId, semester, teacherId,time,capacity, studentId);
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return false;
+        }
+    }
+
+    /**
+     * 教师或管理员更新成绩
+     */
+    @PutMapping("/updateScore")
+    public boolean updateScore(@RequestBody UserUpdateScoreRequest score, HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            User user = (User) o;
+            if(user.getRole()==1) {
+                log.info("学生不能登入成绩");
+                return false;
+            }
+            Integer courseId = score.getCourse_id();
+            Integer semester = score.getSemester();
+            Integer studentId = score.getStudent_id();
+            Integer newScore = score.getNew_score();
+            return userService.updateScore(courseId,semester,studentId,newScore);
+
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return false;
+        }
+    }
+
+    /**
+     * 教师或管理员添加学生成绩
+     */
+    @GetMapping("/addScore")
+    public boolean addScore(@RequestBody Score score, HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            User user = (User) o;
+            if(user.getRole()==1) {
+                log.info("学生不能添加成绩");
+                return false;
+            }
+            Integer courseId = score.getCourse_id();
+            Integer semester = score.getSemester();
+            Integer studentId = score.getStudent_id();
+            Integer score1 = score.getScore();
+            return userService.addScore(courseId,semester,studentId,score1);
+
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return false;
+        }
+    }
+
+    /**
+     * 用户查看成绩
+     */
 
 }
