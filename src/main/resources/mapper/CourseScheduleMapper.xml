@@ -42,6 +42,19 @@
           AND course_id = #{courseId}
     </update>
 
+<!--    根据教师id和学期查询课程列表-->
+    <select id="selectTeacherCourse" resultMap ="BaseResultMap">
+        SELECT * FROM course_schedule
+        <where>
+            <if test="teacherId != null">
+                AND teacher_id = #{teacherId}
+            </if>
+            <if test="semester != null">
+                AND semester = #{semester}
+            </if>
+        </where>
+    </select>
+
     <sql id="Base_Column_List">
         semester,course_id,teacher_id,
         time,capacity

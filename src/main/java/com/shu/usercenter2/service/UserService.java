@@ -1,9 +1,6 @@
 package com.shu.usercenter2.service;
 
-import com.shu.usercenter2.domain.Course;
-import com.shu.usercenter2.domain.CourseSchedule;
-import com.shu.usercenter2.domain.CourseSelection;
-import com.shu.usercenter2.domain.User;
+import com.shu.usercenter2.domain.*;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -131,4 +128,29 @@ public interface UserService extends IService<User> {
      * @return 匹配的Score对象，如果没有找到则返回null
      */
     boolean addScore(Integer courseId, Integer semester, Integer studentId, Integer score1);
+
+    /**
+     * 根据学生ID和学期查询成绩
+     * @param studentId
+     * @param semester
+     * @return
+     */
+    List<Score> selectScore(Integer studentId, Integer semester);
+
+    /**
+     * 根据学生ID和学期查询学生成绩
+     * @param teacherId
+     * @param semester
+     * @return
+     */
+    List<CourseSchedule> selectTeacherCourse(Integer teacherId, Integer semester);
+
+    /**
+     * 查询教师所带课程的学生成绩
+     * @param teacherId
+     * @param semester
+     * @param courseId
+     * @return
+     */
+    List<Score> selectTeacherCourseScore(Integer teacherId, Integer semester, Integer courseId);
 }

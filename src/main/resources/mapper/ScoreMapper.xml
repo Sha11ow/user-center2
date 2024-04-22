@@ -11,6 +11,13 @@
             <result property="score" column="score" jdbcType="INTEGER"/>
     </resultMap>
 
+    <!-- select list by semester and student_id-->
+    <select id="selectScore" resultMap="BaseResultMap">
+        SELECT * FROM score
+        WHERE semester = #{semester}
+          AND student_id = #{studentId}
+    </select>
+
     <!-- Update score by ID -->
     <update id="updateScore">
         UPDATE score
@@ -26,6 +33,23 @@
         WHERE course_id = #{courseId}
           AND semester = #{semester}
           AND student_id = #{studentId}
+    </select>
+
+    <select id="selectTeacherCourseScore" resultMap="BaseResultMap">
+        SELECT * FROM score
+        WHERE course_id = #{courseId}
+          AND semester = #{semester}
+          AND student_id = #{studentId}
+    </select>
+
+    <select id="selectScoresByStudentIdsAndSemesterAndCourseId" resultMap="BaseResultMap">
+        SELECT * FROM score
+        WHERE student_id IN
+        <foreach collection="studentIds" item="studentId" open="(" separator="," close=")">
+            #{studentId}
+        </foreach>
+        AND semester = #{semester}
+        AND course_id = #{courseId}
     </select>
 
     <sql id="Base_Column_List">

@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 /**
 * @author huxing
 * @description 针对表【score】的数据库操作Mapper
@@ -38,6 +40,32 @@ public interface ScoreMapper extends BaseMapper<Score> {
             @Param("semester") Integer semester,
             @Param("studentId") Integer studentId
     );
+
+    /**
+     * 根据学生ID和学期查询学生成绩
+     * @param studentId 学生ID
+     * @param semester  学期
+     * @return 学生成绩列表
+     */
+    List<Score> selectScore(@Param("studentId") Integer studentId, @Param("semester") Integer semester);
+
+    /**
+     * 根据学生ID、学期和课程ID查询教师课程成绩
+     * @param studentId 学生ID
+     * @param semester  学期
+     * @param courseId  课程ID
+     * @return 教师课程成绩列表
+     */
+    Score selectTeacherCourseScore(@Param("studentId") Integer studentId, @Param("semester") Integer semester, @Param("courseId") Integer courseId);
+
+    /**
+     * 根据学生ID、学期和课程ID查询学生成绩
+     * @param studentIds 学生ID列表
+     * @param semester   学期
+     * @param courseId   课程ID
+     * @return 学生成绩列表
+     */
+    List<Score> selectScoresByStudentIdsAndSemesterAndCourseId(@Param("studentIds") List<Integer> studentIds, @Param("semester") Integer semester, @Param("courseId") Integer courseId);
 }
 
 

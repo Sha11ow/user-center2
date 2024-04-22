@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.shu.usercenter2.constant.userLoginConstant.USER_LOGIN_STATE;
 
@@ -435,6 +437,76 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         newScore.setScore(score1);
 
         return scoreService.save(newScore);
+    }
+
+    /**
+     * 根据学生ID和学期查询成绩
+     * @param studentId
+     * @param semester
+     * @return
+     */
+    @Override
+    public List<Score> selectScore(Integer studentId, Integer semester) {
+        if (studentId==null||semester==null){
+            log.info("有参数为空，失败");
+            return Collections.emptyList();
+        }
+        List<Score> scores = scoreMapper.selectScore(studentId, semester);
+        if (!scores.isEmpty()){
+            return scores;
+        }
+        log.info("未找到成绩记录");
+
+        return Collections.emptyList();
+    }
+
+    /**
+     * 根据学期,教师id查询成绩
+     * @param teacherId
+     * @return
+     */
+    @Override
+    public List<CourseSchedule> selectTeacherCourse(Integer teacherId, Integer semester) {
+        if (teacherId==null||semester==null){
+            log.info("有参数为空，失败");
+            return Collections.emptyList();
+        }
+        List<CourseSchedule> courseSchedules = courseScheduleMapper.selectTeacherCourse(teacherId, semester);
+        if (!courseSchedules.isEmpty()){
+            return courseSchedules;
+        }
+        log.info("未找到课程表记录");
+
+        return Collections.emptyList();
+    }
+
+    /**
+     * 根据学期,教师id,课程id查询成绩
+     * @param teacherId
+     * @return
+     */
+    @Override
+    public List<Score> selectTeacherCourseScore(Integer teacherId, Integer semester, Integer courseId) {
+        if (teacherId == null || semester == null || courseId == null) {
+            log.info("有参数为空，失败");
+            return Collections.emptyList();
+        }
+
+        // 先从选课表中查找课程
+        List<CourseSelection> courseSchedules = courseSelectionMapper.selectTeacherCourseSelection(teacherId, semester, courseId);
+        if (courseSchedules.isEmpty()) {
+            log.info("没有人选课");
+            return Collections.emptyList();
+        }
+
+        // 使用学生ID列表，尝试一次性查询所有学生的成绩（具体实现取决于ORM库和数据库类型）
+        List<Integer> studentIds = courseSchedules.stream()
+                .map(CourseSelection::getStudent_id)
+                .collect(Collectors.toList());
+
+        List<Score> scores = scoreMapper.selectScoresByStudentIdsAndSemesterAndCourseId(studentIds, semester, courseId);
+
+        return scores;
     }
 
 

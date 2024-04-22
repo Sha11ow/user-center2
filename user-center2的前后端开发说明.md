@@ -261,3 +261,73 @@ public boolean addScore(@RequestBody Score score, HttpServletRequest httpServlet
   "score": 91
 }
 ```
+
+- 用户查看某学生某学期所有成绩
+
+```Java
+/**
+ * 用户查看某学生某学期所有成绩
+ */
+@GetMapping("/selectScore")
+public List<Score> selectScore(@RequestBody UserSelectScoreRequest userSelectScoreRequest, HttpServletRequest httpServletRequest)
+```
+
+非学生模板，若是学生进行查询，student_id应为空
+
+```json
+GET http://localhost:8080/user/selectScore
+Content-Type: application/json
+
+{
+  "semester": 202303,
+  "student_id": 21036
+}
+```
+
+返回对应列表
+
+- 管理员或教师查看某教师某学期所带课程
+
+```Java 
+/**
+ * 管理员或教师查看某教师某学期所带课程
+ */
+@GetMapping("/selectTeacherCourse")
+public List<CourseSchedule> selectTeacherCourse(@RequestBody CourseSelection courseSelection, HttpServletRequest httpServletRequest)
+```
+
+管理员模板，若是教师查询，教师id可以为空
+
+```json
+GET http://localhost:8080/user/selectTeacherCourse
+Content-Type: application/json
+
+{
+  "semester": 202303,
+  "course_id": null,
+  "teacher_id": 10000,
+  "student_id": null
+}
+```
+
+- 管理员或教师查看某教师某学期某门课的学生成绩
+
+```Java
+/**
+ * 管理员或教师查看某教师某学期某门课的学生成绩
+ * 规定一个教师一个学期不会重复上同一门课
+ */
+@GetMapping("/selectTeacherCourseScore")
+public List<Score> selectTeacherCourseScore(@RequestBody CourseSelection courseSelection, HttpServletRequest httpServletRequest)
+```
+
+管理员模板，若是教师查询，教师id可以为空
+
+```json
+{
+  "semester": 202303,
+  "course_id": 1000,
+  "teacher_id": 10000,
+  "student_id": null
+}
+```

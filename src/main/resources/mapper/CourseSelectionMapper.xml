@@ -16,6 +16,13 @@
         WHERE student_id = #{studentId}
     </select>
 
+    <select id="selectTeacherCourseSelection" resultMap="BaseResultMap">
+        SELECT * FROM course_selection
+        WHERE teacher_id = #{teacherId}
+        AND semester = #{semester}
+        AND course_id = #{courseId}
+    </select>
+
     <sql id="Base_Column_List">
         semester,course_id,teacher_id,
         student_id

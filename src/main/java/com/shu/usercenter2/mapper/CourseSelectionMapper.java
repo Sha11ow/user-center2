@@ -2,6 +2,7 @@ package com.shu.usercenter2.mapper;
 
 import com.shu.usercenter2.domain.CourseSelection;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
@@ -19,6 +20,14 @@ public interface CourseSelectionMapper extends BaseMapper<CourseSelection> {
     List<CourseSelection> findCourseSelectionsByStudentId(Integer studentId);
 
 
+    /**
+     * 根据teacherId、semester、courseId查询对应的课程选择记录
+     * @param teacherId
+     * @param semester
+     * @param courseId
+     * @return
+     */
+    List<CourseSelection> selectTeacherCourseSelection(@Param("teacherId") Integer teacherId, @Param("semester") Integer semester, @Param("courseId") Integer courseId);
 }
 
 

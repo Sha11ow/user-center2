@@ -3,6 +3,7 @@ package com.shu.usercenter2.controller;
 import com.shu.usercenter2.domain.*;
 import com.shu.usercenter2.request.UserLoginRequest;
 import com.shu.usercenter2.request.UserSelectCourseScheduleRequest;
+import com.shu.usercenter2.request.UserSelectScoreRequest;
 import com.shu.usercenter2.request.UserUpdateScoreRequest;
 import com.shu.usercenter2.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -368,7 +369,62 @@ public class UserController {
     }
 
     /**
-     * 用户查看成绩
+     * 用户查看某学生某学期所有成绩
      */
+    @GetMapping("/selectScore")
+    public List<Score> selectScore(@RequestBody UserSelectScoreRequest userSelectScoreRequest, HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            User user = (User) o;
+            Integer studentId = userSelectScoreRequest.getStudent_id();
+            Integer semester = userSelectScoreRequest.getSemester();
+            if (user.getRole()==1)studentId = user.getId();
+            return userService.selectScore(studentId,semester);
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return null;
+        }
+    }
 
+
+    /**
+     * 管理员或教师查看某教师某学期所带课程
+     */
+    @GetMapping("/selectTeacherCourse")
+    public List<CourseSchedule> selectTeacherCourse(@RequestBody CourseSelection courseSelection, HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            User user = (User) o;
+            Integer teacherId = courseSelection.getTeacher_id();
+            Integer semester = courseSelection.getSemester();
+            if(user.getRole()==2)teacherId = user.getId();
+            return userService.selectTeacherCourse(teacherId,semester);
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return null;
+        }
+    }
+
+    /**
+     * 管理员或教师查看某教师某学期某门课的学生成绩
+     * 规定一个教师一个学期不会重复上同一门课
+     */
+    @GetMapping("/selectTeacherCourseScore")
+    public List<Score> selectTeacherCourseScore(@RequestBody CourseSelection courseSelection, HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            User user = (User) o;
+            Integer teacherId = courseSelection.getTeacher_id();
+            Integer semester = courseSelection.getSemester();
+            Integer courseId = courseSelection.getCourse_id();
+            if(user.getRole()==2)teacherId = user.getId();
+            return userService.selectTeacherCourseScore(teacherId,semester,courseId);
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return null;
+        }
+    }
 }
