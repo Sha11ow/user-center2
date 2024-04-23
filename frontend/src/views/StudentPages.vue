@@ -46,35 +46,37 @@
 
             <div v-if="selectedFunction === '选课'">
               <el-form :model="queryInfo" label-width="100px">
+
                 <el-row>
-                  <el-col :span="6">
+                  <el-col :span="8">
+                    <el-form-item label="学期" prop="semester">
+                      <el-select v-model="semester" placeholder="请选择学期">
+                        <el-option label="2023年秋季学期" value="202303"></el-option>
+                        <el-option label="2023年冬季学期" value="202304"></el-option>
+                        <el-option label="2024年春季学期" value="202401"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+
+                <el-row>
+                  <el-col :span="8">
                     <el-form-item label="课程号" prop="CourseId">
                       <el-input v-model="queryInfo.CourseId" placeholder="请输入课程号"></el-input>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="6">
-                    <el-form-item label="课程名" prop="CourseName">
-                      <el-input v-model="queryInfo.CourseName" placeholder="请输入课程名"></el-input>
-                    </el-form-item>
-                  </el-col>
-                  <el-col :span="6">
+                  <el-col :span="8">
                     <el-form-item label="教师号" prop="TeacherId">
                       <el-input v-model="queryInfo.TeacherId" placeholder="请输入教师号"></el-input>
                     </el-form-item>
                   </el-col>
-                  <el-col :span="6">
-                    <el-form-item label="教师姓名" prop="TeacherName">
-                      <el-input v-model="queryInfo.TeacherName" placeholder="请输入教师姓名"></el-input>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="12">
+                  <el-col :span="8">
                     <el-form-item label="上课时间" prop="CourseTime">
                       <el-input v-model="queryInfo.CourseTime" placeholder="请输入上课时间"></el-input>
                     </el-form-item>
                   </el-col>
                 </el-row>
+
               </el-form>
 
               <div style="margin: 10px;">
@@ -88,9 +90,8 @@
                   <el-table-column prop="course_name" label="课程名"></el-table-column>
                   <el-table-column prop="teacher_id" label="教师号"></el-table-column>
                   <el-table-column prop="teacher_name" label="教师姓名"></el-table-column>
-                  <el-table-column prop="capacity" label="课程容量"></el-table-column>
-                  <el-table-column prop="selected_number" label="已选人数"></el-table-column>
                   <el-table-column prop="time" label="上课时间"></el-table-column>
+                  <el-table-column prop="capacity" label="课程容量"></el-table-column>
                 </el-table>
                 <div style="margin: 10px;">
                   <el-button type="primary" @click="selectCourses">确认选课</el-button>
@@ -106,9 +107,8 @@
                   <el-table-column prop="course_name" label="课程名"></el-table-column>
                   <el-table-column prop="teacher_id" label="教师号"></el-table-column>
                   <el-table-column prop="teacher_name" label="教师姓名"></el-table-column>
-                  <el-table-column prop="capacity" label="课程容量"></el-table-column>
-                  <el-table-column prop="selected_number" label="已选人数"></el-table-column>
                   <el-table-column prop="time" label="上课时间"></el-table-column>
+                  <el-table-column prop="capacity" label="课程容量"></el-table-column>
                 </el-table>
                 <div style="margin: 10px;">
                   <el-button type="primary" @click="dropCourses">退选所选课程</el-button>
@@ -147,18 +147,10 @@ export default {
     CourseSchedule
   },
 
-  // 来自父组件的数据
-  props: {
-
-  },
-
   // 在created生命周期钩子中访问路由参数
   created() {
-    // console.log("this.$route",this.$route);
     this.userId = this.$route.params.userId;
     this.userName = this.$route.params.userName;
-    // console.log("userId", this.userId);
-    // console.log("userName", this.userName);
   },
 
   // data()函数部分
@@ -166,48 +158,48 @@ export default {
     return {
       host: "http://127.0.0.1:9000",
       selectedFunction: "选课", // 默认选中的功能
+      semester: "202303", // 默认学期
 
       // 选课功能中的输入框
       showForm: false,
+
+      //选课（查询）————可选课程的查询条件
       queryInfo: {
+        Semester: "202303",
         CourseId: null,
-        CourseName: null,
-        TeacherId: 100027,
-        TeacherName: null,
-        CourseTime: null,
+        TeacherId: null,
+        Time: null,
+        Capacity: null,
       },
 
-      // 选课功能中的课程信息
+      // 选课（查询）————满足查询条件的课程信息
       courseInfo: [{
         course_id: "course_id",
         course_name: "course_name",
         teacher_id: "teacher_id",
         teacher_name: "teacher_name",
+        time: "time",
         capacity: 0,
-        selected_number: 0,
-        time: "time"
       }],
 
-      // 选课功能中选中的课程号
+      // 选课(选择)————选中的课程号
       selectedCourses: [{
         course_id: "course_id",
         course_name: "course_name",
         teacher_id: "teacher_id",
         teacher_name: "teacher_name",
+        time: "time",
         capacity: 0,
-        selected_number: 0,
-        time: "time"
       }],
 
-      // 退课功能中选中的课程号
+      // 退课（选择）————选中的课程号
       deletedCourses: [{
         course_id: "course_id",
         course_name: "course_name",
         teacher_id: "teacher_id",
         teacher_name: "teacher_name",
+        time: "time",
         capacity: 0,
-        selected_number: 0,
-        time: "time"
       }],
 
       // 学生已经选的课程
@@ -216,9 +208,8 @@ export default {
         course_name: "course_name",
         teacher_id: "teacher_id",
         teacher_name: "teacher_name",
-        capacity: 0,
-        selected_number: 0,
         time: "time",
+        capacity: 0,
       }],
 
       // 学生成绩信息
@@ -242,84 +233,87 @@ export default {
       this.selectedFunction = functionName;
     },
 
-    // 查询功能
-    async queryCourses() {
-      // 把v-model数据保存到变量中
-      const course_id = this.queryInfo.CourseId;
-      const course_name = this.queryInfo.CourseName;
-      const teacher_id = this.queryInfo.TeacherId;
-      const teacher_name = this.queryInfo.TeacherName;
-      const course_time = this.queryInfo.CourseTime;
-
-      // 构造请求体
-      const apiUrl = `${this.host}/api/courses`;
-      const queryParams = {
-        course_id: course_id,
-        course_name: course_name,
-        teacher_id: teacher_id,
-        teacher_name: teacher_name,
-        course_time: course_time
-      };
-      await axios.get(apiUrl, { params: queryParams })
-        .then(response => {
-
-          const courseData = response.data.data;
-
-          // 把courseData中的数据传递给this.courseInfo
-          if (courseData != null) {
-            // 显示响应结果
-            ElMessage.success('选课信息查询成功');
-
-            console.log("queryCourses method return response.data", response.data);
-            // console.log("response.data.data: courseData", courseData);
-
-            this.courseInfo = courseData.map((course) => {
-              const selectedCourse = JSON.parse(course);
-              return {
-                course_id: selectedCourse.course_id,
-                course_name: selectedCourse.course_name,
-                teacher_id: selectedCourse.teacher_id,
-                teacher_name: selectedCourse.teacher_name,
-                capacity: selectedCourse.capacity,
-                selected_number: selectedCourse.selected_number,
-                time: selectedCourse.time
-              };
-            });
-            this.showForm = true;
-          } else {
-            ElMessage.error('选课信息查询失败');
-          }
-          console.log("this.courseInfo", this.courseInfo);
-          // 显示表单组件
-
-        }, error => {
-          // 处理响应失败的情况
-          console.error("选课信息查询失败", error);
-          ElMessage.error('选课信息查询失败')
-        })
+    // 查询课程名
+    async getCourseName(courseId) {
+    // 替换为实际的API URL
+      const courseNameApiUrl = `${this.host}/user/selectCourse`;
+      const response = await axios.get(courseNameApiUrl, { params: { course_id: courseId } });
+      return response.data.course_name;
     },
 
-    // 查询已选课程
-    async fetchCourses() {
+    // 查询教师名
+    async getTeacherName(teacherId) {
+      // 替换为实际的API URL
+      const teacherNameApiUrl = `${this.host}/user/selectUserById`;
+      const queryParams = {
+        id: teacherId,
+        password: null,
+        name: null,
+        role: null,
+      };
+      const response = await axios.get(teacherNameApiUrl, { params: queryParams });
+      return response.data.name;
+    },
 
-      // 构造请求体
-      const apiUrl = `${this.host}/api/students/${this.userId}/courses`;
+    // 查询课程功能
+    async queryCourses() {
+      const semester = this.semester;
+      const course_id = this.queryInfo.CourseId;
+      const teacher_id = this.queryInfo.TeacherId;
+      const time = this.queryInfo.Time;
+      const capacity = this.queryInfo.Capacity;
+
+      const apiUrl = `${this.host}/user/selectCourseSchedule`;
+      const courseSchedule = {
+        semester: semester,
+        course_id: course_id,
+        teacher_id: teacher_id,
+        time: time,
+        capacity: capacity,
+      };
 
       try {
-        // 发送 GET 请求
-        const response = await axios.get(apiUrl);
-
-        console.log("return from fetchCourses, response: ", response);
-
+        const response = await axios.get(apiUrl, { params: courseSchedule });
         const courseData = response.data;
-        this.myCourses = courseData.data.map(course => JSON.parse(course));
-        console.log("this.myCourses", this.myCourses);
 
+        if (courseData != null) {
+          ElMessage.success('选课信息查询成功');
+          console.log("queryCourses method return response.data", courseData);
+
+          // 查询课程号对应的课程名
+          const courseNamePromises = courseData.map((course) => {
+            return this.getCourseName(course.course_id);
+          });
+
+          // 查询教师号对应的教师名
+          const teacherNamePromises = courseData.map((course) => {
+            return this.getTeacherName(course.teacher_id);
+          });
+
+          const [courseInfoWithCourseName, courseInfoWithTeacherName] = await Promise.all([
+            Promise.all(courseNamePromises),
+            Promise.all(teacherNamePromises)
+          ]);
+
+           // 合并课程信息
+           this.courseInfo = courseInfoWithCourseName.map((course, index) => ({
+            ...course,
+            teacher_name: courseInfoWithTeacherName[index].teacher_name
+          }));
+
+          this.showForm = true;
+        } else {
+          ElMessage.error('选课信息查询失败');
+        }
+        console.log("this.courseInfo", this.courseInfo);
       } catch (error) {
-        console.error("课表信息查询失败", error);
-        ElMessage.error("课表信息查询失败");
+        // 处理响应失败的情况
+        console.error("选课信息查询失败", error);
+        ElMessage.error('选课信息查询失败');
       }
     },
+
+
 
     // 更新选课功能中的选中课程到selectedCourse
     handleSelectionChange(selectedRows) {
@@ -327,48 +321,35 @@ export default {
       this.selectedCourses = selectedRows;
     },
 
-    // 更新退课功能中的选中课程到deletedCourses
-    handleSelectionChange_delete(selectedRows) {
-      console.log("选中的课程 selectedRows:", selectedRows);
-      this.deletedCourses = selectedRows;
-    },
-
     // 选课功能
     async selectCourses() {
       try {
-        // 创建一个空数组，用于存储请求体数据
         const requestBody = [];
-        // console.log("selectedCourses", this.selectedCourses);
-
+  
         // 使用 forEach 方法遍历 selectedCourses 数组
         this.selectedCourses.forEach((course) => {
-          // 将每个课程信息转换为一个包含课程信息的对象，并将其添加到 requestBody 数组中
           requestBody.push({
             course_id: course.course_id,
-            course_name: course.course_name,
+            semester: this.semester,
+            student_id: this.userId,
             teacher_id: course.teacher_id,
-            teacher_name: course.teacher_name,
-            capacity: course.capacity,
-            selected_number: course.selected_number,
             time: course.time,
+            capacity: course.capacity,
           });
         });
 
         console.log("选课请求发送的 requestBody", requestBody);
 
-        const apiUrl = `${this.host}/api/students/${this.userId}/courses`;
+        const apiUrl = `${this.host}user/courseSelect`;
         const response = await axios.post(apiUrl, requestBody);
 
         console.log("selectCourses return response: ", response);
 
         const result = response.data;
-        if (result.code == 200) {
+        if (result.success === true) {
           ElMessage.success("选课成功");
           this.selectedCourses = []; // 清空已选课程
           this.fetchCourses(); // 重新查询课表
-        }
-        else if (result.code == 401) {
-          ElMessage.warning(response.data.msg);
         }
         else {
           ElMessage.error("选课失败：" + result.message);
@@ -378,6 +359,39 @@ export default {
         ElMessage.error("选课操作失败");
       }
     },
+
+    // 查询已选课程
+    async fetchCourses() {
+      const apiUrl = `${this.host}/user/semesterCourseSelection`;
+      const queryParams = {
+        semester: this.semester,
+        course_id: null,
+        teacher_id: null,
+        student_id: this.userId,
+      };
+
+      try {
+        const response = await axios.get(apiUrl, { params: queryParams });
+
+        console.log("return from fetchCourses, response: ", response);
+
+        const courseData = response.data;
+        this.myCourses = courseData.map(course => JSON.parse(course));
+        console.log("this.myCourses", this.myCourses);
+
+      } catch (error) {
+        console.error("课表信息查询失败", error);
+        ElMessage.error("课表信息查询失败");
+      }
+    },
+
+    // 更新退课功能中的选中课程到deletedCourses
+    handleSelectionChange_delete(selectedRows) {
+      console.log("选中的课程 selectedRows:", selectedRows);
+      this.deletedCourses = selectedRows;
+    },
+
+    
 
     // 退课功能
     async dropCourses() {
