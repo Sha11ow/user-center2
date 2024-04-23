@@ -68,6 +68,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         //登录成功,会话保存用户信息
         request.getSession().setAttribute(USER_LOGIN_STATE,user);
+        Object o = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            log.info("用户信息已存入session");
+        }
 
         return user;
 

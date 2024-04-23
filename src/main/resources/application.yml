@@ -1,5 +1,13 @@
 server:
   port: 9000
+  servlet:
+    session:
+      cookie:
+        name: JSESSIONID
+        max-age: 2592000
+        domain: 127.0.0.1
+        secure: false
+        http-only: false
 spring:
   application:
     name: user-center

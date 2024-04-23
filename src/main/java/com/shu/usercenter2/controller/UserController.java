@@ -62,7 +62,7 @@ public class UserController {
      * @param user
      * @return
      */
-    @GetMapping("/addUser")
+    @PostMapping("/addUser")
     public boolean addUser(@RequestBody User user,HttpServletRequest request) {
         //取得角色身份
         Object o = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -91,7 +91,7 @@ public class UserController {
      * 管理员添加课程，若课程已存在会报错
      *
      */
-    @GetMapping("/addCourse")
+    @PostMapping("/addCourse")
     public boolean addCourse(@RequestBody Course course, HttpServletRequest request) {
         //取得角色身份
         Object o = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -120,7 +120,7 @@ public class UserController {
      * @param courseSchedule
      * @return
      */
-    @GetMapping("/addCourseSchedule")
+    @PostMapping("/addCourseSchedule")
     public boolean addCourseSchedule(@RequestBody CourseSchedule courseSchedule, HttpServletRequest request) {
         //取得角色身份
         Object o = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -153,7 +153,7 @@ public class UserController {
      * @param user
      * @return
      */
-    @GetMapping("/selectUser")
+    @PostMapping("/selectUser")
     public List<User> selectUser(@RequestBody User user, HttpServletRequest request) {
         //取得角色身份
         Object o = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -183,8 +183,9 @@ public class UserController {
      * @param course
      * @return
      */
-    @GetMapping("/selectCourse")
+    @PostMapping("/selectCourse")
     public Course selectCourse(@RequestBody Course course, HttpServletRequest httpServletRequest){
+
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         if(o!=null){
             Integer courseId = course.getCourse_id();
@@ -201,7 +202,7 @@ public class UserController {
      * 用户对课表查询
      * @param courseSchedule
      */
-    @GetMapping("/selectCourseSchedule")
+    @PostMapping("/selectCourseSchedule")
     public List<CourseSchedule> selectCourseSchedule(@RequestBody CourseSchedule courseSchedule,
                                                      HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
@@ -223,7 +224,7 @@ public class UserController {
      * 学生或者管理员选课,如果是学生就用会话的学生id信息,传参为null，如果是管理员就用传入的学生id信息，不能为null
      * @return
      */
-    @GetMapping("/courseSelect")
+    @PostMapping("/courseSelect")
     public boolean courseSelect(@RequestBody UserSelectCourseScheduleRequest courseSchedule,
                                 HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
@@ -259,7 +260,7 @@ public class UserController {
     /**
      * 学生或管理员查询学生某学期的选课情况,用的是courseSelection查询，返回的是一个课程安排列表
      */
-    @GetMapping("/semesterCourseSelection")
+    @PostMapping("/semesterCourseSelection")
     public List<CourseSchedule> semesterCourseSelection(@RequestBody CourseSelection courseSelection,
                                                          HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
@@ -285,7 +286,7 @@ public class UserController {
     /**
      * 学生或管理员退课
      */
-    @GetMapping("/courseWithdraw")
+    @PostMapping("/courseWithdraw")
     public boolean courseWithdraw(@RequestBody UserSelectCourseScheduleRequest courseSchedule,
                                   HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
@@ -346,7 +347,7 @@ public class UserController {
     /**
      * 教师或管理员添加学生成绩
      */
-    @GetMapping("/addScore")
+    @PostMapping("/addScore")
     public boolean addScore(@RequestBody Score score, HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         if(o!=null){
@@ -371,7 +372,7 @@ public class UserController {
     /**
      * 用户查看某学生某学期所有成绩
      */
-    @GetMapping("/selectScore")
+    @PostMapping("/selectScore")
     public List<Score> selectScore(@RequestBody UserSelectScoreRequest userSelectScoreRequest, HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         if(o!=null){
@@ -391,7 +392,7 @@ public class UserController {
     /**
      * 管理员或教师查看某教师某学期所带课程
      */
-    @GetMapping("/selectTeacherCourse")
+    @PostMapping("/selectTeacherCourse")
     public List<CourseSchedule> selectTeacherCourse(@RequestBody CourseSelection courseSelection, HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         if(o!=null){
@@ -411,7 +412,7 @@ public class UserController {
      * 管理员或教师查看某教师某学期某门课的学生成绩
      * 规定一个教师一个学期不会重复上同一门课
      */
-    @GetMapping("/selectTeacherCourseScore")
+    @PostMapping("/selectTeacherCourseScore")
     public List<Score> selectTeacherCourseScore(@RequestBody CourseSelection courseSelection, HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         if(o!=null){
@@ -431,7 +432,7 @@ public class UserController {
     /**
      * 根据id查询用户
      */
-    @GetMapping("/selectUserById")
+    @PostMapping("/selectUserById")
     public User selectUserById(@RequestBody User user, HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         if(o!=null){

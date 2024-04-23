@@ -134,6 +134,7 @@
 
 <script>
 import axios from "axios";
+axios.defaults.withCredentials = true;
 
 import StudentQueryScore from "./StudentQueryScore.vue";
 import CourseSchedule from "../components/CourseSchedule.vue";
@@ -183,7 +184,7 @@ export default {
       }],
 
       // 选课(选择)————选中的课程号
-      selectedCourses: [{
+      selectedCourse: [{
         course_id: "course_id",
         course_name: "course_name",
         teacher_id: "teacher_id",
@@ -235,23 +236,30 @@ export default {
 
     // 查询课程名
     async getCourseName(courseId) {
-    // 替换为实际的API URL
       const courseNameApiUrl = `${this.host}/user/selectCourse`;
-      const response = await axios.get(courseNameApiUrl, { params: { course_id: courseId } });
+      const course = {
+        course_id: courseId,
+      };
+      const response = await axios.post(courseNameApiUrl, course);
+      if (response.data != null) {
+          ElMessage.success('课程名查询成功');
+      }
       return response.data.course_name;
     },
 
     // 查询教师名
     async getTeacherName(teacherId) {
-      // 替换为实际的API URL
       const teacherNameApiUrl = `${this.host}/user/selectUserById`;
-      const queryParams = {
+      const user = {
         id: teacherId,
         password: null,
         name: null,
         role: null,
       };
-      const response = await axios.get(teacherNameApiUrl, { params: queryParams });
+      const response = await axios.post(teacherNameApiUrl,user);
+      if (response.data != null) {
+          ElMessage.success('教师名查询成功');
+      }
       return response.data.name;
     },
 
@@ -273,39 +281,45 @@ export default {
       };
 
       try {
-        const response = await axios.get(apiUrl, { params: courseSchedule });
+        const response = await axios.post(apiUrl, courseSchedule);
         const courseData = response.data;
 
         if (courseData != null) {
           ElMessage.success('选课信息查询成功');
+          
           console.log("queryCourses method return response.data", courseData);
+          console.log(typeof courseData);
 
-          // 查询课程号对应的课程名
-          const courseNamePromises = courseData.map((course) => {
-            return this.getCourseName(course.course_id);
+          const courseNamePromises = [];
+          const teacherNamePromises = [];
+
+          courseData.forEach((course) => {
+            courseNamePromises.push(this.getCourseName(course.course_id));
+            teacherNamePromises.push(this.getTeacherName(course.teacher_id));
           });
 
-          // 查询教师号对应的教师名
-          const teacherNamePromises = courseData.map((course) => {
-            return this.getTeacherName(course.teacher_id);
+          const courseNames = await Promise.all(courseNamePromises);
+          const teacherNames = await Promise.all(teacherNamePromises);
+
+          const courseInfo = courseData.map((course, index) => {
+            return {
+              course_id: course.course_id,
+              course_name: courseNames[index],
+              teacher_id: course.teacher_id,
+              teacher_name: teacherNames[index],
+              time: course.time,
+              capacity: course.capacity,
+            };
           });
 
-          const [courseInfoWithCourseName, courseInfoWithTeacherName] = await Promise.all([
-            Promise.all(courseNamePromises),
-            Promise.all(teacherNamePromises)
-          ]);
-
-           // 合并课程信息
-           this.courseInfo = courseInfoWithCourseName.map((course, index) => ({
-            ...course,
-            teacher_name: courseInfoWithTeacherName[index].teacher_name
-          }));
+          this.courseInfo = courseInfo;
+          console.log("courseInfo", courseInfo);
 
           this.showForm = true;
         } else {
           ElMessage.error('选课信息查询失败');
         }
-        console.log("this.courseInfo", this.courseInfo);
+        
       } catch (error) {
         // 处理响应失败的情况
         console.error("选课信息查询失败", error);
@@ -318,30 +332,28 @@ export default {
     // 更新选课功能中的选中课程到selectedCourse
     handleSelectionChange(selectedRows) {
       console.log("选中的课程 selectedRows:", selectedRows);
-      this.selectedCourses = selectedRows;
+      this.selectedCourse = selectedRows;
+      console.log("selectedCourse:", this.selectedCourse);
     },
 
     // 选课功能
     async selectCourses() {
       try {
-        const requestBody = [];
-  
-        // 使用 forEach 方法遍历 selectedCourses 数组
-        this.selectedCourses.forEach((course) => {
-          requestBody.push({
-            course_id: course.course_id,
-            semester: this.semester,
-            student_id: this.userId,
-            teacher_id: course.teacher_id,
-            time: course.time,
-            capacity: course.capacity,
-          });
-        });
+        // 创建一个对象，用于存储选课信息
+        const requestBody = {
+          semester: this.semester,
+          student_id: this.userId,
+          course_id: this.selectedCourse[0].course_id,
+          teacher_id: this.selectedCourse[0].teacher_id,
+          time: this.selectedCourse[0].time,
+          capacity: this.selectedCourse[0].capacity,
+        };
 
         console.log("选课请求发送的 requestBody", requestBody);
 
-        const apiUrl = `${this.host}user/courseSelect`;
+        const apiUrl = `${this.host}/user/courseSelect`;
         const response = await axios.post(apiUrl, requestBody);
+
 
         console.log("selectCourses return response: ", response);
 
@@ -363,7 +375,7 @@ export default {
     // 查询已选课程
     async fetchCourses() {
       const apiUrl = `${this.host}/user/semesterCourseSelection`;
-      const queryParams = {
+      const requestBody = {
         semester: this.semester,
         course_id: null,
         teacher_id: null,
@@ -371,7 +383,7 @@ export default {
       };
 
       try {
-        const response = await axios.get(apiUrl, { params: queryParams });
+        const response = await axios.post(apiUrl, requestBody);
 
         console.log("return from fetchCourses, response: ", response);
 
