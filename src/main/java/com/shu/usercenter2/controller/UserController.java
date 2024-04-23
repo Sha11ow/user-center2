@@ -427,4 +427,21 @@ public class UserController {
             return null;
         }
     }
+
+    /**
+     * 根据id查询用户
+     */
+    @GetMapping("/selectUserById")
+    public User selectUserById(@RequestBody User user, HttpServletRequest httpServletRequest){
+        Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if(o!=null){
+            Integer id = user.getId();
+            return userService.selectUserById(id);
+        }
+        else{
+            log.info("会话过期，请重新登录");
+            return null;
+        }
+    }
+
 }

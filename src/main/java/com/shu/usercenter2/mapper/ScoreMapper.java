@@ -2,6 +2,7 @@ package com.shu.usercenter2.mapper;
 
 import com.shu.usercenter2.domain.Score;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.shu.usercenter2.domain.User;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
@@ -66,6 +67,8 @@ public interface ScoreMapper extends BaseMapper<Score> {
      * @return 学生成绩列表
      */
     List<Score> selectScoresByStudentIdsAndSemesterAndCourseId(@Param("studentIds") List<Integer> studentIds, @Param("semester") Integer semester, @Param("courseId") Integer courseId);
+
+
 }
 
 

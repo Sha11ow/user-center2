@@ -509,6 +509,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return scores;
     }
 
+    /**
+     * 根据id查询用户
+     * @param id
+     * @return
+     */
+    @Override
+    public User selectUserById(Integer id) {
+        if (id==null){
+            log.info("参数为空，失败");
+            return null;
+        }
+        User user = this.getById(id);
+        if (user!=null){
+            return user;
+        }
+        log.info("未找到用户记录");
+        return null;
+    }
+
+
 
 }
 
