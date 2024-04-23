@@ -331,3 +331,26 @@ public List<Score> selectTeacherCourseScore(@RequestBody CourseSelection courseS
   "student_id": null
 }
 ```
+
+- 根据id查询用户
+
+```Java
+/**
+ * 根据id查询用户
+ */
+@GetMapping("/selectUserById")
+public User selectUserById(@RequestBody User user, HttpServletRequest httpServletRequest)
+```
+
+查询模板
+
+```json
+{
+  "id": 10000,
+  "password": null,
+  "name": null,
+  "role": null
+}
+```
+
+返回一个用户对象

@@ -153,4 +153,12 @@ public interface UserService extends IService<User> {
      * @return
      */
     List<Score> selectTeacherCourseScore(Integer teacherId, Integer semester, Integer courseId);
+
+
+    /**
+     * 根据id查询用户
+     * @param id
+     * @return
+     */
+    User selectUserById(Integer id);
 }
