@@ -103,7 +103,7 @@ public void logout(HttpServletRequest request) {
 
 前端应该返回一个**course_id**和**course_name**的json字段（两者返回一个或者都返回）
 
-后端返回Coure对象
+后端返回Course对象
 
 - 查询课程表
 
