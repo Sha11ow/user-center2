@@ -322,7 +322,7 @@ public class UserController {
     /**
      * 教师或管理员更新成绩
      */
-    @PutMapping("/updateScore")
+    @PostMapping("/updateScore")
     public boolean updateScore(@RequestBody UserUpdateScoreRequest score, HttpServletRequest httpServletRequest){
         Object o = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         if(o!=null){

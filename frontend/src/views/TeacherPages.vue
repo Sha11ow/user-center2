@@ -29,14 +29,26 @@
         </el-row>
       </el-header>
 
+      <el-form :model="semester" label-width="100px" style="margin-top: 20px;">
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="学期" prop="semester">
+                <el-select v-model="semester" placeholder="请选择学期" @change="fetchCourses">
+                  <el-option label="2023年秋季学期" value="202303"></el-option>
+                  <el-option label="2023年冬季学期" value="202304"></el-option>
+                  <el-option label="2024年春季学期" value="202401"></el-option>
+                </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+
       <div class="main-content">
 
         <el-aside width="200px">
           <el-menu default-active="1" class="el-menu-vertical-demo">
             <el-menu-item index="1" @click="selectFunction('开课详情'); fetchCourses()">开课详情</el-menu-item>
             <el-menu-item index="2" @click="selectFunction('成绩录入')">成绩录入</el-menu-item>
-            <!--el-menu-item index="3" @click="selectFunction('成绩分析')">成绩分析</el-menu-item>
-                        <el-menu-item index="4" @click="selectFunction('开设课程')">开设课程</el-menu-item-->
           </el-menu>
         </el-aside>
 
@@ -48,9 +60,8 @@
               <el-table-column prop="course_name" label="课程名" />
               <el-table-column prop="teacher_id" label="教师号" />
               <el-table-column prop="teacher_name" label="教师姓名" />
-              <el-table-column prop="capacity" label="课程容量" />
-              <el-table-column prop="selected_number" label="已选人数" />
               <el-table-column prop="time" label="上课时间" />
+              <el-table-column prop="capacity" label="课程余量" />
             </el-table>
           </div>
 
@@ -72,27 +83,17 @@
                   <template v-slot="scope">
                     <template v-if="scope.row">
                       <el-row>
-                        <el-col :span="4">
-                          <label for="daily-score-input">平时成绩</label>
-                          <el-input v-model="scope.row.daily_score" class="w-80" placeholder="平时成绩"
-                            id="daily-score-input" />
+                        <el-col :span="8">
+                          <el-input v-model="scope.row.score" class="w-80" placeholder="成绩" id="score-input" />
                         </el-col>
-
                         <el-col :span="4">
-                          <label for="exam-score-input">考试成绩</label>
-                          <el-input v-model="scope.row.examination_score" class="w-80" placeholder="考试成绩"
-                            id="exam-score-input" />
+                          <el-button type="primary" @click="submitScore(scope.row)" style="margin-left: 20px;">保存</el-button>
                         </el-col>
-
                       </el-row>
                     </template>
-
                   </template>
                 </el-table-column>
               </el-table>
-              <div style="margin: 20px;">
-                <el-button type="primary" @click="submitScore">保存</el-button>
-              </div>
             </div>
 
           </div>
@@ -111,6 +112,7 @@
     
 <script>
 import axios from "axios";
+axios.defaults.withCredentials = true;
 import { ElMessage } from 'element-plus'
 
 
@@ -127,11 +129,8 @@ export default {
 
   // 在created生命周期钩子中访问路由参数
   created() {
-    console.log("this.$route", this.$route);
     this.userId = this.$route.params.userId;
     this.userName = this.$route.params.userName;
-    console.log("userId", this.userId);
-    console.log("userName", this.userName);
 
     this.fetchCourses();
   },
@@ -140,8 +139,8 @@ export default {
   data() {
     return {
       host: "http://127.0.0.1:9000",
+      semester: "202401", // 默认学期
       selectedFunction: "开课详情", // 默认选中的功能
-
       selectedCourse: "请选择班级", // 默认选中的课程
 
       // 已经选的课程
@@ -151,28 +150,22 @@ export default {
         teacher_id: "",
         teacher_name: "",
         capacity: 0,
-        selected_number: 0,
         time: "time",
-        score: 0
       }],
 
       // 上传成绩表格需要的信息
       tableData: [{
-        // 这两个信息帮助筛选班级
         course_id: "",
         teacher_id: "",
-
         student_id: "",
         student_name: "",
-        daily_score: 0,
-        examination_score: 0
+        score: 0,
       }],
 
       SubmitData: [
         {
           student_id: "",
-          daily_score: 0,
-          examination_score: 0
+          score: 0,
         },
       ]
     };
@@ -196,22 +189,86 @@ export default {
       this.selectedFunction = functionName;
     },
 
+    // 查询课程名
+    async getCourseName(courseId) {
+      const courseNameApiUrl = `${this.host}/user/selectCourse`;
+      const course = {
+        course_id: courseId,
+      };
+      const response = await axios.post(courseNameApiUrl, course);
+      if (response.data != null) {
+          //ElMessage.success('课程名查询成功');
+      }
+      else {
+        ElMessage.error('课程名查询失败');
+      }
+      return response.data.course_name;
+    },
+
+    // 查询教师名/学生名
+    async getUserName(userId) {
+      const userNameApiUrl = `${this.host}/user/selectUserById`;
+      const user = {
+        id: userId,
+        password: null,
+        name: null,
+        role: null,
+      };
+      const response = await axios.post(userNameApiUrl,user);
+      if (response.data != null) {
+        //ElMessage.success('教师名查询成功');
+      }
+      else {
+        ElMessage.error('用户姓名查询失败');
+      }
+      return response.data.name;
+    },
+
+
     // 查询该教师已经开设的课程
     async fetchCourses() {
-
-      // 构造请求体 /api/teachers/{userId}/courses
-      const apiUrl = `${this.host}/api/teachers/${this.userId}/courses`;
-      console.log("apiUrl", apiUrl);
+      const apiUrl = `${this.host}/user/selectTeacherCourse`;
+      const requestBody = {
+        semester: this.semester,
+        course_id: null,
+        teacher_id: this.userId,
+        student_id: null,
+      };
       try {
-        // 发送 GET 请求
-        const response = await axios.get(apiUrl);
-
-        console.log("return from fetchCourses, response: ", response.data);
-
+        const response = await axios.post(apiUrl,requestBody);
+        console.log("查询到的开课信息, response: ", response.data);
         const courseData = response.data;
-        this.myCourses = courseData.data.map(course => JSON.parse(course));
-        console.log("this.myCourses", this.myCourses);
 
+        if(courseData != null) {
+          console.log("courseData", courseData);
+          console.log(typeof courseData);
+
+          const courseNamePromises = [];
+          const teacherNamePromises = [];
+
+          courseData.forEach((course) => {
+            courseNamePromises.push(this.getCourseName(course.course_id));
+            teacherNamePromises.push(this.getUserName(course.teacher_id));
+          });
+
+          const courseNames = await Promise.all(courseNamePromises);
+          const teacherNames = await Promise.all(teacherNamePromises);
+
+          const myCourses = courseData.map((course, index) => {
+            return {
+              course_id: course.course_id,
+              course_name: courseNames[index],
+              teacher_id: course.teacher_id,
+              teacher_name: teacherNames[index],
+              time: course.time,
+              capacity: course.capacity,
+            };
+          });
+          this.myCourses = myCourses;
+          console.log("myCourses", myCourses);
+        } else {
+          ElMessage.error('开课信息查询失败');
+        }
       } catch (error) {
         console.error("开设信息查询失败", error);
         ElMessage.error("开设信息查询失败");
@@ -221,54 +278,67 @@ export default {
     /* 
     通过watch部分关联，每次完成选择后自动调用 fetchStudents 方法，并更新 tableData 数组中的数据
     查询该教师和他开设的所有课程的信息返回到tableData中
-    对应文档中的接口 /教师/课程学生名单：GET /api/teachers/{teacher_id}/courses/{course_id}
     */
     async fetchStudents() {
-
-      // 构造请求体
-      const apiUrl = `${this.host}/api/teachers/${this.userId}/courses/${this.selectedCourse}`;
+      const apiUrl = `${this.host}/user/selectTeacherCourseScore`;
       console.log("this.selectedCourse", this.selectedCourse);
+      const requestBody = {
+        semester: this.semester,
+        course_id: this.selectedCourse,
+        teacher_id: this.userId,
+        student_id: null,
+      };
 
       try {
-        // 发送 GET 请求
-        const response = await axios.get(apiUrl);
-        console.log("return from fetchStudents, response: ", response);
+        const response = await axios.post(apiUrl, requestBody);
+        const scoreData = response.data;
+        console.log("查询选择该课程的所有学生接收到的response.data", response.data);
 
-        // 用JSON.parse()方法将字符串转换为JSON对象
-        const courseData = response.data;
-        this.tableData = courseData.data.map(course => JSON.parse(course));
+        if (scoreData != null) {
+          ElMessage.success('学生信息查询成功');
+          console.log("scoreData", scoreData);
 
-        console.log("this.tableData", this.tableData);
-      }
-      catch (error) {
-        console.error("该班级下学生信息查询失败", error);
-        ElMessage.error("班级下学生信息查询失败");
+          const studentNamePromises = [];
+          scoreData.forEach((score) => {
+            studentNamePromises.push(this.getUserName(score.student_id));
+          });
+          const studentNames = await Promise.all(studentNamePromises);
+          const tableData = scoreData.map((score, index) => {
+            return {
+              course_id: score.course_id,
+              teacher_id: this.userId,
+              student_id: score.student_id,
+              student_name: studentNames[index],
+              score: score.score,
+            };
+          });
+          this.tableData = tableData;
+          console.log("tableData", tableData);
+        } else {
+          ElMessage.error('已选课程信息查询失败');
+        }
+      } catch (error) {
+        console.error("课表信息查询失败", error);
+        ElMessage.error("课表信息查询失败");
       }
     },
 
     // 上传成绩
-    async submitScore() {
-
-      // 构造请求体,路径参数传递教师号和课程号
-      const apiUrl = `${this.host}/api/teachers/${this.userId}/courses/${this.selectedCourse}`;
-      console.log("this.tableData", this.tableData);
-
+    async submitScore(rawSco) {
+      const apiUrl = `${this.host}/user/updateScore`; //调用的是update接口，因为选课的时候已经新增记录了
       try {
-        // 将tableData中的数据转换为SubmitData中的数据
-        this.SubmitData = this.tableData.map(student => {
-          return {
-            student_id: student.student_id,
-            daily_score: student.daily_score,
-            examination_score: student.examination_score
-          }
-        });
-        console.log("this.SubmitData", this.SubmitData);
+        const requestBody = {
+            course_id: this.selectedCourse,
+            student_id: rawSco.student_id,
+            new_score: rawSco.score,
+            semester: this.semester,
+        };
 
-        // 发送 POST 请求
-        const response = await axios.post(apiUrl, this.SubmitData);
+        console.log("requestBody", requestBody);
 
-        // 返回状态码为200，表示上传成功
-        if (response.data.code === 200) {
+        const response = await axios.post(apiUrl, requestBody);
+
+        if (response.data != null) {
           console.log("return from fetchCourses, response:", response);
           ElMessage.success("成绩上传成功");
         }

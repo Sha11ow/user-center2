@@ -36,7 +36,7 @@ export default {
     };
   },
   created() {
-    console.log("课程表中的数据", this.myCourses);
+    console.log("课程表中的数据this.myCourses", this.myCourses);
 
     // 创建映射对象
     const dayMapping = {

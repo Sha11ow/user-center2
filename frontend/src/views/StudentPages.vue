@@ -30,6 +30,20 @@
         </el-row>
       </el-header>
 
+      <el-form :model="semester" label-width="100px" style="margin-top: 20px;">
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="学期" prop="semester">
+                <el-select v-model="semester" placeholder="请选择学期" @change="fetchCourses">
+                  <el-option label="2023年秋季学期" value="202303"></el-option>
+                  <el-option label="2023年冬季学期" value="202304"></el-option>
+                  <el-option label="2024年春季学期" value="202401"></el-option>
+                </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+
       <el-container>
 
         <el-aside width="200px">
@@ -37,7 +51,7 @@
             <el-menu-item index="1" @click="selectFunction('选课')">选课</el-menu-item>
             <el-menu-item index="2" @click="selectFunction('退课'); fetchCourses()">退课</el-menu-item>
             <el-menu-item index="3" @click="selectFunction('成绩查询'); fetchScores()">成绩查询</el-menu-item>
-            <el-menu-item index="4" @click="selectFunction('课表查询')">课表查询</el-menu-item>
+            <el-menu-item index="4" @click="selectFunction('课表查询'); fetchCourses()">课表查询</el-menu-item>
           </el-menu>
         </el-aside>
 
@@ -46,19 +60,6 @@
 
             <div v-if="selectedFunction === '选课'">
               <el-form :model="queryInfo" label-width="100px">
-
-                <el-row>
-                  <el-col :span="8">
-                    <el-form-item label="学期" prop="semester">
-                      <el-select v-model="semester" placeholder="请选择学期">
-                        <el-option label="2023年秋季学期" value="202303"></el-option>
-                        <el-option label="2023年冬季学期" value="202304"></el-option>
-                        <el-option label="2024年春季学期" value="202401"></el-option>
-                      </el-select>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-
                 <el-row>
                   <el-col :span="8">
                     <el-form-item label="课程号" prop="CourseId">
@@ -76,7 +77,6 @@
                     </el-form-item>
                   </el-col>
                 </el-row>
-
               </el-form>
 
               <div style="margin: 10px;">
@@ -91,7 +91,7 @@
                   <el-table-column prop="teacher_id" label="教师号"></el-table-column>
                   <el-table-column prop="teacher_name" label="教师姓名"></el-table-column>
                   <el-table-column prop="time" label="上课时间"></el-table-column>
-                  <el-table-column prop="capacity" label="课程容量"></el-table-column>
+                  <el-table-column prop="capacity" label="课程余量"></el-table-column>
                 </el-table>
                 <div style="margin: 10px;">
                   <el-button type="primary" @click="selectCourses">确认选课</el-button>
@@ -108,7 +108,7 @@
                   <el-table-column prop="teacher_id" label="教师号"></el-table-column>
                   <el-table-column prop="teacher_name" label="教师姓名"></el-table-column>
                   <el-table-column prop="time" label="上课时间"></el-table-column>
-                  <el-table-column prop="capacity" label="课程容量"></el-table-column>
+                  <el-table-column prop="capacity" label="课程余量"></el-table-column>
                 </el-table>
                 <div style="margin: 10px;">
                   <el-button type="primary" @click="dropCourses">退选所选课程</el-button>
@@ -159,14 +159,14 @@ export default {
     return {
       host: "http://127.0.0.1:9000",
       selectedFunction: "选课", // 默认选中的功能
-      semester: "202303", // 默认学期
+      semester: "202401", // 默认学期
 
       // 选课功能中的输入框
       showForm: false,
 
       //选课（查询）————可选课程的查询条件
       queryInfo: {
-        Semester: "202303",
+        Semester: "202401",
         CourseId: null,
         TeacherId: null,
         Time: null,
@@ -175,6 +175,7 @@ export default {
 
       // 选课（查询）————满足查询条件的课程信息
       courseInfo: [{
+        semester: "202401", 
         course_id: "course_id",
         course_name: "course_name",
         teacher_id: "teacher_id",
@@ -194,7 +195,7 @@ export default {
       }],
 
       // 退课（选择）————选中的课程号
-      deletedCourses: [{
+      deletedCourse: [{
         course_id: "course_id",
         course_name: "course_name",
         teacher_id: "teacher_id",
@@ -205,11 +206,11 @@ export default {
 
       // 学生已经选的课程
       myCourses: [{
-        course_id: "course_id",
-        course_name: "course_name",
-        teacher_id: "teacher_id",
-        teacher_name: "teacher_name",
-        time: "time",
+        course_id: "",
+        course_name: "",
+        teacher_id: "",
+        teacher_name: "",
+        time: "",
         capacity: 0,
       }],
 
@@ -217,7 +218,6 @@ export default {
       myScores: [{
         course_id: "",
         course_name: "",
-        teacher_name: "",
         score: 0
       }]
     };
@@ -242,7 +242,10 @@ export default {
       };
       const response = await axios.post(courseNameApiUrl, course);
       if (response.data != null) {
-          ElMessage.success('课程名查询成功');
+          //ElMessage.success('课程名查询成功');
+      }
+      else {
+        ElMessage.error('课程名查询失败');
       }
       return response.data.course_name;
     },
@@ -258,7 +261,10 @@ export default {
       };
       const response = await axios.post(teacherNameApiUrl,user);
       if (response.data != null) {
-          ElMessage.success('教师名查询成功');
+        //ElMessage.success('教师名查询成功');
+      }
+      else {
+        ElMessage.error('教师名查询失败');
       }
       return response.data.name;
     },
@@ -303,6 +309,7 @@ export default {
 
           const courseInfo = courseData.map((course, index) => {
             return {
+              semester: course.semester,
               course_id: course.course_id,
               course_name: courseNames[index],
               teacher_id: course.teacher_id,
@@ -311,7 +318,6 @@ export default {
               capacity: course.capacity,
             };
           });
-
           this.courseInfo = courseInfo;
           console.log("courseInfo", courseInfo);
 
@@ -319,15 +325,12 @@ export default {
         } else {
           ElMessage.error('选课信息查询失败');
         }
-        
       } catch (error) {
         // 处理响应失败的情况
         console.error("选课信息查询失败", error);
         ElMessage.error('选课信息查询失败');
       }
     },
-
-
 
     // 更新选课功能中的选中课程到selectedCourse
     handleSelectionChange(selectedRows) {
@@ -339,7 +342,6 @@ export default {
     // 选课功能
     async selectCourses() {
       try {
-        // 创建一个对象，用于存储选课信息
         const requestBody = {
           semester: this.semester,
           student_id: this.userId,
@@ -348,23 +350,19 @@ export default {
           time: this.selectedCourse[0].time,
           capacity: this.selectedCourse[0].capacity,
         };
-
         console.log("选课请求发送的 requestBody", requestBody);
 
         const apiUrl = `${this.host}/user/courseSelect`;
         const response = await axios.post(apiUrl, requestBody);
 
-
         console.log("selectCourses return response: ", response);
-
-        const result = response.data;
-        if (result.success === true) {
+        if (response.data === true) {
           ElMessage.success("选课成功");
-          this.selectedCourses = []; // 清空已选课程
+          this.selectedCourse = []; // 清空已选课程
           this.fetchCourses(); // 重新查询课表
         }
         else {
-          ElMessage.error("选课失败：" + result.message);
+          ElMessage.error("选课失败：" + response.message);
         }
       } catch (error) {
         console.error("选课操作失败", error);
@@ -384,13 +382,39 @@ export default {
 
       try {
         const response = await axios.post(apiUrl, requestBody);
-
-        console.log("return from fetchCourses, response: ", response);
-
         const courseData = response.data;
-        this.myCourses = courseData.map(course => JSON.parse(course));
-        console.log("this.myCourses", this.myCourses);
+        console.log("查询已选课程接收到的response.data", response.data);
 
+        if (courseData != null) {
+          ElMessage.success('已选课程信息查询成功');
+          console.log("courseData", courseData);
+
+          const courseNamePromises = [];
+          const teacherNamePromises = [];
+
+          courseData.forEach((course) => {
+            courseNamePromises.push(this.getCourseName(course.course_id));
+            teacherNamePromises.push(this.getTeacherName(course.teacher_id));
+          });
+
+          const courseNames = await Promise.all(courseNamePromises);
+          const teacherNames = await Promise.all(teacherNamePromises);
+
+          const myCourses = courseData.map((course, index) => {
+            return {
+              course_id: course.course_id,
+              course_name: courseNames[index],
+              teacher_id: course.teacher_id,
+              teacher_name: teacherNames[index],
+              time: course.time,
+              capacity: course.capacity,
+            };
+          });
+          this.myCourses = myCourses;
+          console.log("myCourses", myCourses);
+        } else {
+          ElMessage.error('已选课程信息查询失败');
+        }
       } catch (error) {
         console.error("课表信息查询失败", error);
         ElMessage.error("课表信息查询失败");
@@ -398,48 +422,37 @@ export default {
     },
 
     // 更新退课功能中的选中课程到deletedCourses
-    handleSelectionChange_delete(selectedRows) {
-      console.log("选中的课程 selectedRows:", selectedRows);
-      this.deletedCourses = selectedRows;
+    handleSelectionChange_delete(selectedRow) {
+      console.log("选中的课程 selectedRow:", selectedRow);
+      this.deletedCourse = selectedRow;
     },
-
-    
 
     // 退课功能
     async dropCourses() {
-      // 发送请求进行退课操作
       try {
-        const requestBody = [];
-
-        console.log("deletedCourses", this.deletedCourses);
-
-        this.deletedCourses.forEach((course) => {
-          requestBody.push({
-            course_id: course.course_id,
-            course_name: course.course_name,
-            teacher_id: course.teacher_id,
-            teacher_name: course.teacher_name,
-            capacity: course.capacity,
-            selected_number: course.selected_number,
-            time: course.time,
-          });
-        });
+        const requestBody = {
+          course_id: this.deletedCourse[0].course_id,
+          semester: this.semester,
+          student_id: this.userId,
+          teacher_id: this.deletedCourse[0].teacher_id,
+          time: this.deletedCourse[0].time,
+          capacity: this.deletedCourse[0].capacity,
+        };
 
         console.log("退课请求发送的 requestBody", requestBody);
 
-        const apiUrl = `${this.host}/api/students/${this.userId}/courses`;
-        const response = await axios.delete(apiUrl, { data: requestBody });
+        const apiUrl = `${this.host}/user/courseWithdraw`;
+        const response = await axios.post(apiUrl, requestBody);
 
-        console.log("response return from dropCourses()", response);
-
-        if (response.data.code == 200) {
-
+        console.log("courseWithdraw return response: ", response);
+        
+        if (response.data === true) {
           ElMessage.success("退课成功");
-          this.deletedCourses = []; // 清空已选课程
+          this.deletedCourse = []; // 清空已选课程
           this.fetchCourses(); // 重新查询课表
         }
         else {
-          ElMessage.error("退课失败：" + response.data.msg);
+          ElMessage.error("退课失败：" + response.message);
         }
       } catch (error) {
         console.error("退课操作失败", error);
@@ -449,24 +462,41 @@ export default {
 
     // 成绩查询功能
     async fetchScores() {
-      // 构造请求体
-      const apiUrl = `${this.host}/api/students/${this.userId}/courses/score`;
-      try {
-        // 发送 GET 请求
-        const response = await axios.get(apiUrl);
+      const apiUrl = `${this.host}/user/selectScore`;
 
-        console.log("return from fetchScores, response: ", response);
-        if (response.data.code == 200) {
+      const requestBody = {
+        semester: this.semester,
+        student_id: this.userId,
+      };
+
+      try {
+        const response = await axios.post(apiUrl, requestBody);
+        console.log("查询到的该学生这学期的所有成绩", response.data);
+        const scoreData = response.data;
+        
+        if (scoreData != null) {
           ElMessage.success("成绩信息查询成功");
+          console.log("scoreData", scoreData);
+
+          const courseNamePromises = [];
+          scoreData.forEach((score) => {
+            courseNamePromises.push(this.getCourseName(score.course_id));
+          });
+          const courseNames = await Promise.all(courseNamePromises);
+          const myScores = scoreData.map((score, index) => {
+            return {
+              course_id: score.course_id,
+              course_name: courseNames[index],
+              score: score.score,
+            };
+          });
+          this.myScores = myScores;
+          console.log("this.myScores", this.myScores);      
         }
         else {
           ElMessage.error("成绩信息查询失败");
           return;
         }
-        const scoreData = response.data;
-        this.myScores = scoreData.data.map(score => JSON.parse(score));
-        console.log("this.myScores", this.myScores);
-
       } catch (error) {
         console.error("成绩信息查询失败", error);
         ElMessage.error("成绩信息查询失败");

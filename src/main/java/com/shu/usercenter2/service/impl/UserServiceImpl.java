@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.shu.usercenter2.constant.userLoginConstant.USER_LOGIN_STATE;
@@ -203,6 +204,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return courseScheduleService.save(courseSchedule);
     }
 
+
     /**
      * 用户选课
      * @param courseId
@@ -294,6 +296,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return false;
         }
 
+        //更新成绩表
+        Score score = new Score();
+        score.setCourse_id(courseId);
+        score.setSemester(semester);
+        score.setStudent_id(studentId);
+        score.setScore(0);
+        boolean save1 = scoreService.save(score);
+        if (!save1) {
+            log.info("更新成绩表失败");
+            return false;
+        }
+
         return true;
     }
 
@@ -315,18 +329,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             log.info("未找到选课记录");
             return Collections.emptyList();
         }
-
+        List<CourseSchedule> new_courseSchedules= new ArrayList<>();
         for (CourseSelection courseSelection : courseSelections) {
+            if (!Objects.equals(courseSelection.getSemester(), semester)) {
+                continue;
+            }
             List<CourseSchedule> courseSchedules = selectCourseSchedule(courseSelection.getCourse_id(),
                     courseSelection.getSemester(), courseSelection.getTeacher_id(), null, null);
             if (courseSchedules.isEmpty()) {
                 log.info("课程表不存在,数据库数据有问题");
                 return Collections.emptyList();
             }
-            return courseSchedules;
-
+            CourseSchedule courseSchedule = courseSchedules.get(0);
+            new_courseSchedules.add(courseSchedule);
         }
-        return Collections.emptyList();
+        return new_courseSchedules;
     }
 
     /**
