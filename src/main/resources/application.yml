@@ -13,9 +13,9 @@ spring:
     name: user-center
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/usercenter2
+    url: jdbc:mysql://localhost:3306/usercenter_db
     username: root
-    password: 123456
+    password: Sha11owdream
   cors:
     allowed-origins: "http://localhost:8080"  # 允许来自这个地址的请求
     allowed-methods: "*"  # 允许的HTTP方法，"*"表示允许所有方法

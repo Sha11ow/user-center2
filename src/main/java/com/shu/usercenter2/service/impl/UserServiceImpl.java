@@ -394,6 +394,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return false;
         }
 
+        //删除成绩表
+        QueryWrapper<Score> queryWrapper1 = new QueryWrapper<>();
+        queryWrapper1.eq("course_id", courseId);
+        queryWrapper1.eq("student_id", studentId);
+        boolean remove1 = scoreService.remove(queryWrapper1);
+        if (!remove1) {
+            log.info("删除成绩表失败");
+            return false;
+        }
+
+
         return true;
     }
 
