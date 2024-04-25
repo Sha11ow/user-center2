@@ -385,14 +385,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return false;
         }
 
-        //更新课程表
-        courseSchedule.setCapacity(courseSchedule.getCapacity() + 1);
-        int rowsAffected = courseScheduleMapper.updateCapacityByData(courseSchedule.getSemester(),
-                courseSchedule.getTime(), courseSchedule.getTeacher_id(), courseSchedule.getCourse_id());
-        if (rowsAffected == 0) {
-            log.info("更新课程表失败");
-            return false;
-        }
+//        //更新课程表
+//        courseSchedule.setCapacity(courseSchedule.getCapacity() + 1);
+//        int rowsAffected = courseScheduleMapper.updateCapacityByData(courseSchedule.getSemester(),
+//                courseSchedule.getTime(), courseSchedule.getTeacher_id(), courseSchedule.getCourse_id());
+//        if (rowsAffected == 0) {
+//            log.info("更新课程表失败");
+//            return false;
+//        }
 
         //删除成绩表
         QueryWrapper<Score> queryWrapper1 = new QueryWrapper<>();
