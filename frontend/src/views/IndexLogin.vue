@@ -70,8 +70,8 @@ export default {
   // data of the component
   data() {
     return {
-      userId: "21036",
-      password: "yWhISjKg1a",
+      userId: "10000",
+      password: "5dhhERIT0o",
       userName: "default",
       host: "http://127.0.0.1:9000",
     };

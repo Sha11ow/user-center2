@@ -30,7 +30,6 @@
       </el-header>
 
       <el-form :model="semester" label-width="100px" style="margin-top: 20px;">
-        <el-row>
           <el-col :span="8">
             <el-form-item label="学期" prop="semester">
                 <el-select v-model="semester" placeholder="请选择学期" @change="fetchCourses">
@@ -40,15 +39,16 @@
                 </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
       </el-form>
 
       <div class="main-content">
 
+        <!--边栏——功能选择-->
         <el-aside width="200px">
           <el-menu default-active="1" class="el-menu-vertical-demo">
             <el-menu-item index="1" @click="selectFunction('开课详情'); fetchCourses()">开课详情</el-menu-item>
             <el-menu-item index="2" @click="selectFunction('成绩录入')">成绩录入</el-menu-item>
+            <el-menu-item index="3" @click="selectFunction('成绩分析')">成绩分析</el-menu-item>
           </el-menu>
         </el-aside>
 
@@ -68,40 +68,70 @@
           <div v-else-if="selectedFunction === '成绩录入'">
             <!--根据开课详情中的班级信息，可以进行筛选，录入成绩-->
             <!--根据courseInfo的课程名字做一个选择框-->
-            <div style="margin: 20px;">
-              <label for="course-select">选择课程班级：</label>
-              <el-select v-model="selectedCourse" class="m-2" placeholder="">
-                <el-option v-for="course in myCourses" :key="course.course_id" :label="course - select"
-                  :value="course.course_id" />
-              </el-select>
-
+            <div>
+              <div style="text-align: left; margin: 10px;">
+                <label for="course-select" style="width: 150px;">选择课程班级：</label>
+                <el-select v-model="selectedCourse" class="m-2" style="width: 120px;" placeholder="">
+                  <el-option v-for="course in myCourses" :key="course.course_id" :label="course - select" :value="course.course_id" />
+                </el-select>
+              </div>
+              <div style="text-align: left; margin: 10px;">
+                <label for="exam-score" style="width: 150px;">考试成绩占比：</label>
+                <input type="text" v-model="examWeight" id="exam-score" style="width: 100px;" />%
+              </div>
+              
               <!--对选中的selectedCourse进行查询，返回数据给tableData-->
               <el-table :data="tableData" stripe style="width: 100%">
-                <el-table-column prop="student_id" label="学号" width="180" />
-                <el-table-column prop="student_name" label="姓名" width="180" />
-                <el-table-column label="成绩">
+                <el-table-column prop="student_id" label="学号" width="100" />
+                <el-table-column prop="student_name" label="姓名" width="100" />
+                <el-table-column prop="score" label="当前成绩" width="100" />
+                <el-table-column label="上传成绩">
                   <template v-slot="scope">
                     <template v-if="scope.row">
+
                       <el-row>
-                        <el-col :span="8">
-                          <el-input v-model="scope.row.score" class="w-80" placeholder="成绩" id="score-input" />
+                        <el-col :span="4">
+                          <label for="daily_score" style="margin-left: 20px;">平时成绩</label>
+                          <el-input v-model="scope.row.daily_score" style="margin-left: 10px;" id="daily_score-input" />
                         </el-col>
+
+                        <el-col :span="4">
+                          <label for="exam_score" style="margin-left: 20px;">考试成绩</label>
+                          <el-input v-model="scope.row.exam_score" style="margin-left: 10px;" id="exam_score-input" />
+                        </el-col>
+                       
                         <el-col :span="4">
                           <el-button type="primary" @click="submitScore(scope.row)" style="margin-left: 20px;">保存</el-button>
                         </el-col>
                       </el-row>
+
                     </template>
                   </template>
                 </el-table-column>
               </el-table>
-            </div>
 
+            </div>
           </div>
 
           <div v-else-if="selectedFunction === '成绩分析'">
-          </div>
+            <div>
+              <div style="text-align: left; margin: 10px;">
+                <label for="course-select" style="width: 150px;">选择课程班级：</label>
+                <el-select v-model="selectedCourse" class="m-2" style="width: 120px;" placeholder="">
+                  <el-option v-for="course in myCourses" :key="course.course_id" :label="course - select" :value="course.course_id" />
+                </el-select>
+              </div>
 
-          <div v-else-if="selectedFunction === '开设课程'">
+              <el-table :data="classAnalysis" style="width: 100%">
+                <el-table-column prop="course_id" label="课程号" />
+                <el-table-column prop="course_name" label="课程名" />
+                <el-table-column prop="average_score" label="平均分" />
+                <el-table-column prop="max_score" label="最高分" />
+                <el-table-column prop="min_score" label="最低分" />
+                <el-table-column prop="pass_rate" label="及格率" />
+              </el-table>
+
+            </div>
           </div>
 
         </div>
@@ -142,6 +172,7 @@ export default {
       semester: "202401", // 默认学期
       selectedFunction: "开课详情", // 默认选中的功能
       selectedCourse: "请选择班级", // 默认选中的课程
+      examWeight: 70, // 默认考试成绩占比为70%，用户可以修改
 
       // 已经选的课程
       myCourses: [{
@@ -159,15 +190,26 @@ export default {
         teacher_id: "",
         student_id: "",
         student_name: "",
+        daily_score: 0,
+        examination_score: 0,
         score: 0,
       }],
 
-      SubmitData: [
-        {
+      SubmitData: [{
           student_id: "",
           score: 0,
-        },
-      ]
+      }],
+
+      // 班级成绩统计分析
+      classAnalysis: [{
+        course_id: "",
+        course_name: "",
+        teacher_id: "",
+        average_score: 0,
+        max_score: 0,
+        min_score: 0,
+        pass_rate: 0,
+      }],
     };
   },
 
@@ -295,7 +337,7 @@ export default {
         console.log("查询选择该课程的所有学生接收到的response.data", response.data);
 
         if (scoreData != null) {
-          ElMessage.success('学生信息查询成功');
+          //ElMessage.success('学生信息查询成功');
           console.log("scoreData", scoreData);
 
           const studentNamePromises = [];
@@ -314,6 +356,7 @@ export default {
           });
           this.tableData = tableData;
           console.log("tableData", tableData);
+          this.calculateClassAnalysis(); //执行成绩统计分析
         } else {
           ElMessage.error('已选课程信息查询失败');
         }
@@ -323,34 +366,90 @@ export default {
       }
     },
 
+
     // 上传成绩
-    async submitScore(rawSco) {
-      const apiUrl = `${this.host}/user/updateScore`; //调用的是update接口，因为选课的时候已经新增记录了
-      try {
-        const requestBody = {
-            course_id: this.selectedCourse,
-            student_id: rawSco.student_id,
-            new_score: rawSco.score,
-            semester: this.semester,
-        };
+    async submitScore(row) {
+      const dailyScore = parseFloat(row.daily_score);
+      const examScore = parseFloat(row.exam_score);
+      const examWeight = parseFloat(this.examWeight) / 100;
 
-        console.log("requestBody", requestBody);
+      // 确保输入值是有效的数字
+      if (!isNaN(dailyScore) && !isNaN(examScore)) {
+        const totalScore = dailyScore * (1 - examWeight) + examScore * examWeight;
+        row.score = totalScore.toFixed(2); // 更新当前行的总分
+        console.log("折算成的总成绩totalScore：", totalScore);
+        const apiUrl = `${this.host}/user/updateScore`; //调用的是update接口，因为选课的时候已经新增记录了
+        try {
+          const requestBody = {
+              course_id: this.selectedCourse,
+              student_id: row.student_id,
+              new_score: totalScore,
+              semester: this.semester,
+          };
 
-        const response = await axios.post(apiUrl, requestBody);
+          console.log("requestBody", requestBody);
 
-        if (response.data != null) {
-          console.log("return from fetchCourses, response:", response);
-          ElMessage.success("成绩上传成功");
+          const response = await axios.post(apiUrl, requestBody);
+
+          if (response.data != null) {
+            console.log("return from fetchCourses, response:", response);
+            ElMessage.success("成绩上传成功");
+            this.fetchStudents(); //重新查询学生成绩
+          }
+          else {
+            ElMessage.error("成绩上传失败");
+          }
         }
-        else {
+        catch (error) {
+          console.error("成绩上传失败", error);
           ElMessage.error("成绩上传失败");
         }
-      }
-      catch (error) {
-        console.error("成绩上传失败", error);
-        ElMessage.error("成绩上传失败");
+      } else {
+        ElMessage.error("请输入有效的数字");
+        return;
       }
     },
+
+    //班级成绩统计分析
+    async calculateClassAnalysis() {
+    if (this.tableData.length === 0) {
+      return; // 如果没有数据，直接返回
+    }
+
+    let sum = 0;
+    let max = 0;
+    let min = Infinity;
+    let passCount = 0;
+
+    this.tableData.forEach((student) => {
+      const score = parseFloat(student.score);
+      if (!isNaN(score)) {
+        sum += score; // 累加总分
+        max = Math.max(max, score); // 更新最大值
+        min = Math.min(min, score); // 更新最小值
+        if (score > 60) {
+          passCount++; // 及格人数
+        }
+      }
+    });
+
+    const average = sum / this.tableData.length; // 计算平均分
+    const passRate = (passCount / this.tableData.length) * 100; // 计算及格率
+
+    const courseName = await this.getCourseName(this.selectedCourse); //查询课程名
+    console.log("courseName:", courseName);
+
+    // 更新classAnalysis数组
+    this.classAnalysis = [{
+      course_id: this.selectedCourse,
+      course_name: courseName, 
+      teacher_id: this.userId,
+      average_score: average.toFixed(2), // 保留两位小数
+      max_score: max,
+      min_score: min,
+      pass_rate: passRate.toFixed(2), // 保留两位小数
+    }];
+  }
   },
 };
 </script>
@@ -450,5 +549,10 @@ input {
   background-color: #8ac9e2;
   color: white;
 }
+
+.align-left {
+    text-align: left; /* 设置文本对齐为左对齐 */
+    margin-left: 0; /* 设置左边距为0，确保元素贴近左边 */
+  }
 </style>
     
