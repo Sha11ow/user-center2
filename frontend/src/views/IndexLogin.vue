@@ -57,6 +57,7 @@
 
 <script>
 import axios from "axios";
+import md5 from "md5";
 import { ElMessage } from 'element-plus'
 
 
@@ -71,7 +72,7 @@ export default {
   data() {
     return {
       userId: "10000",
-      password: "5dhhERIT0o",
+      password: "111111",
       userName: "default",
       host: "http://127.0.0.1:9000",
     };
@@ -82,7 +83,9 @@ export default {
     async login() {
     //异步方法
       const id = this.userId;
-      const password = this.password;
+      const raw_password = this.password;
+      // 使用 md5 对密码进行摘要处理
+      const password = md5(id + raw_password);
 
       const apiUrl = `${this.host}/user/login`;
 
