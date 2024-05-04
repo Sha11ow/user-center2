@@ -113,27 +113,37 @@ apiUrl = ${this.host}/user/updateScore
 
 ## `AdminPages.vue`
 
-管理员接口很多，选几个重要的写吧
-
 ### 添加用户
 
-### 添加课程
-
-### 添加开课计划（课程表）
+```
+method：handleAddUser()
+apiUrl = ${this.host}/user/selectUser
+```
 
 ### 查询用户
 
+```
+method: searchUser()
+apiUrl:${this.host}/user/selectUser
+```
+
+### 添加课程
+
+```
+method: handleAddCourse()
+apiUrl: ${this.host}/user/addCourse
+```
+
 ### 查询课程
 
-### 查询开课计划（课程表）
+```
+method: handleSearchCourseSelection()
+apiUrl: ${this.host}/user/selectCourse
+```
 
-### 选课
+### 查询选课
 
-### 退课
-
-### 更改成绩
-
-### 查看某学生成绩
-
-### 查看某教师某学期所带课程
-
+```
+method: handleSearchCourseSelection()
+apiUrl: ${this.host}/user/semesterCourseSelection
+```
