@@ -1,17 +1,17 @@
 /*
  Navicat MySQL Data Transfer
 
- Source Server         : localhost_3306
+ Source Server         : usercenter
  Source Server Type    : MySQL
  Source Server Version : 80036
- Source Host           : localhost:3306
- Source Schema         : usercenter2
+ Source Host           : 1.94.183.168:3306
+ Source Schema         : usercenter_db
 
  Target Server Type    : MySQL
  Target Server Version : 80036
  File Encoding         : 65001
 
- Date: 06/05/2024 19:31:21
+ Date: 06/05/2024 19:36:24
 */
 
 SET NAMES utf8mb4;
@@ -201,7 +201,6 @@ INSERT INTO `score` VALUES (202304, 1016, 21072, 0);
 INSERT INTO `score` VALUES (202304, 1016, 21079, 0);
 INSERT INTO `score` VALUES (202304, 1016, 21109, 0);
 INSERT INTO `score` VALUES (202304, 1016, 21179, 0);
-INSERT INTO `score` VALUES (202401, 1017, 21036, 0);
 
 -- ----------------------------
 -- Table structure for user
