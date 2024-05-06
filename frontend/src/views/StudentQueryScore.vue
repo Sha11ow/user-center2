@@ -5,7 +5,7 @@
             <el-table-column prop="course_name" label="课程名" align="center" />
             <el-table-column label="绩点" align="center">
                 <template v-slot="scope">
-                    <div>{{ calculateGPA(scope.row.score) }}</div>
+                    <div>{{ calculateGPA_str(scope.row.score) }}</div>
                 </template>
             </el-table-column>
         </el-table>
@@ -58,7 +58,7 @@ export default {
     },
     methods: {
         //分数转换为绩点
-        calculateGPA(score) {
+        /*calculateGPA_str(score) {
             if (score >= 90) return '4.0';
             if (score >= 85) return '3.7';
             if (score >= 82) return '3.3';
@@ -70,11 +70,30 @@ export default {
             if (score >= 63) return '1.3';
             if (score >= 60) return '1.0';
             return 0.0;
+        },*/
+        calculateGPA(score) {
+            if (score >= 90) return 4.0;
+            if (score >= 85) return 3.7;
+            if (score >= 82) return 3.3;
+            if (score >= 78) return 3.0;
+            if (score >= 75) return 2.7;
+            if (score >= 72) return 2.3;
+            if (score >= 69) return 2.0;
+            if (score >= 66) return 1.7;
+            if (score >= 63) return 1.3;
+            if (score >= 60) return 1.0;
+            return 0.0;
+        },
+        calculateGPA_str(score) {
+            const gpa = this.calculateGPA(score);
+            return gpa.toFixed(1); // 保留1位小数
         },
         //计算平均绩点
         calculateAverageGPA() {
             const totalGPA = this.myCourses.reduce((sum, course) => sum + this.calculateGPA(course.score), 0);
+            console.log("totalGPA", totalGPA);
             const averageGPA = totalGPA / this.myCourses.length;
+            console.log("averageGPA", averageGPA);
             return averageGPA.toFixed(2); // 保留2位小数
         },
     },

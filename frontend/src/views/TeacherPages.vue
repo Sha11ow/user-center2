@@ -32,7 +32,7 @@
       <el-form :model="semester" label-width="100px" style="margin-top: 20px;">
           <el-col :span="8">
             <el-form-item label="学期" prop="semester">
-                <el-select v-model="semester" placeholder="请选择学期" @change="fetchCourses">
+                <el-select v-model="semester" placeholder="请选择学期" @change="fetchCourses()">
                   <el-option label="2023年秋季学期" value="202303"></el-option>
                   <el-option label="2023年冬季学期" value="202304"></el-option>
                   <el-option label="2024年春季学期" value="202401"></el-option>
@@ -71,7 +71,7 @@
             <div>
               <div style="text-align: left; margin: 10px;">
                 <label for="course-select" style="width: 150px;">选择课程班级：</label>
-                <el-select v-model="selectedCourse" class="m-2" style="width: 120px;" placeholder="">
+                <el-select v-model="selectedCourse" class="m-2" style="width: 120px;" placeholder="" @change="fetchStudents()">
                   <el-option v-for="course in myCourses" :key="course.course_id" :label="course - select" :value="course.course_id" />
                 </el-select>
               </div>
@@ -117,7 +117,7 @@
             <div>
               <div style="text-align: left; margin: 10px;">
                 <label for="course-select" style="width: 150px;">选择课程班级：</label>
-                <el-select v-model="selectedCourse" class="m-2" style="width: 120px;" placeholder="">
+                <el-select v-model="selectedCourse" class="m-2" style="width: 120px;" placeholder="" @change="fetchStudents()">
                   <el-option v-for="course in myCourses" :key="course.course_id" :label="course - select" :value="course.course_id" />
                 </el-select>
               </div>

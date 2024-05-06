@@ -34,7 +34,7 @@
         <el-row>
           <el-col :span="8">
             <el-form-item label="学期" prop="semester">
-                <el-select v-model="semester" placeholder="请选择学期" @change="fetchCourses">
+                <el-select v-model="semester" placeholder="请选择学期" @change="fetchCourses(); fetchScores()">
                   <el-option label="2023年秋季学期" value="202303"></el-option>
                   <el-option label="2023年冬季学期" value="202304"></el-option>
                   <el-option label="2024年春季学期" value="202401"></el-option>
@@ -50,7 +50,7 @@
           <el-menu default-active="1" class="el-menu-vertical-demo">
             <el-menu-item index="1" @click="selectFunction('选课')">选课</el-menu-item>
             <el-menu-item index="2" @click="selectFunction('退课'); fetchCourses()">退课</el-menu-item>
-            <el-menu-item index="3" @click="selectFunction('成绩查询'); fetchScores()">成绩查询</el-menu-item>
+            <el-menu-item index="3" @click="selectFunction('成绩查询'); fetchCourses(); fetchScores()">成绩查询</el-menu-item>
             <el-menu-item index="4" @click="selectFunction('课表查询'); fetchCourses()">课表查询</el-menu-item>
           </el-menu>
         </el-aside>
@@ -491,7 +491,7 @@ export default {
             };
           });
           this.myScores = myScores;
-          console.log("this.myScores", this.myScores);      
+          console.log("this.myScores", this.myScores);
         }
         else {
           ElMessage.error("成绩信息查询失败");
